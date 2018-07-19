@@ -1,0 +1,87 @@
+<admintpl file="header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<!--<li><a href="{:U('menu/index')}">{:L('ADMIN_MENU_INDEX')}</a></li>-->
+			<!--<li><a href="{:U('menu/add')}">{:L('ADMIN_MENU_ADD')}</a></li>-->
+			<li class="active"><a href="#">修改房源标签</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form" action="{:U('housesource/edit_post')}">
+			<!--<h3 style="" class="controls">修改房源标签</h3>-->
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">房源类型名称:</label>
+					<div class="controls">
+						<input type="text" name="typename" id='typename' value="{$data.typename}">
+						<!--<span class="form-required">*</span>-->
+					</div>
+				</div>
+
+			</fieldset>
+			<div class="form-actions">
+				<input type="hidden" name="id" value="{$data.id}" />
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick="return checkPost()">{:L('SAVE')}</button>
+				<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+				<!-- <button class="btn js-ajax-close-btn" type="submit">{:L('CLOSE')}</button> -->
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script>
+		$(function() {
+			$(".js-ajax-close-btn").on('click', function(e) {
+				e.preventDefault();
+				Wind.use("artDialog", function() {
+					art.dialog({
+						id : "question",
+						icon : "question",
+						fixed : true,
+						lock : true,
+						background : "#CCCCCC",
+						opacity : 0,
+						content : "您确定需要关闭当前页面嘛？",
+						ok : function() {
+							setCookie('refersh_time_admin_menu_index', 1);
+							window.close();
+							return true;
+						}
+					});
+				});
+			});
+		});
+	</script>
+	<script>
+        function checkPost(){
+            var num = false;
+            var name = $("#typename").val();
+            if(name == '' || name == null){
+                alert('标签名称必须填写!');
+                return false;
+            }else{
+                if(name.length > 6){
+                    alert('标签名称最多6个字符!');
+                    return false;
+                }
+                $.ajax({
+                    type: 'GET',
+                    async:false,
+                    url: '<?php echo U("housesource/check_name")?>',
+                    data: 'typename='+name,
+                    success: function (data) {
+                        if(data > 0){
+                            num = true;
+                            alert('标签名称不能重复!');
+                            return false;
+                        }
+                    },
+                    dataType: 'json',
+                });
+            }
+            if(num){
+                return false;
+            }
+        }
+	</script>
+</body>
+</html>

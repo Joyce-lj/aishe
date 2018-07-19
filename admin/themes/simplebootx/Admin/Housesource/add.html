@@ -1,0 +1,81 @@
+<admintpl file="header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<!--<li><a href="{:U('housesource/index')}">房源列表</a></li>-->
+			<li class="active"><a href="{:U('housesource/add')}">新增标签</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form" enctype="multipart/form-data" action="{:U('housesource/add_post')}">
+			<!--<h3 style="" class="controls">新增房源标签</h3>-->
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">名称:</label>
+					<div class="controls">
+						<input type="text" name="typename" id="typename" placeholder="请输入标签名称" required>
+						<span class="form-required" style="color: red">*</span>
+					</div>
+				</div>
+
+			</fieldset>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">{:L('ADD')}</button>
+				<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+</body>
+</html>
+<script>
+	function checkPost(){
+	    var num = false;
+        var name = $("#typename").val();
+        if(name == '' || name == null){
+            alert('标签名称必须填写!');
+            return false;
+        }else{
+            if(name.length > 6){
+                alert('标签名称最多6个字符!');
+                return false;
+			}
+            $.ajax({
+                type: 'GET',
+                async:false,
+                url: '<?php echo U("housesource/check_name")?>',
+                data: 'typename='+name,
+                success: function (data) {
+                    if(data > 0){
+                        num = true;
+                        alert('标签名称不能重复!');
+                        return false;
+                    }
+                },
+                dataType: 'json',
+            });
+		}
+		if(num){
+            return false;
+		}
+
+	}
+
+
+    // $("#filename").click(function () {
+    //     $.ajax({
+    //         type: 'GET',
+    //         url: '<?php echo U("news/delete_attach")?>',
+    //         data: 'allids='+allids+'&undeleids='+undeleids,
+    //         success: function (data) {
+    //             if(data.code == 0){
+    //                 $(".aids").val(undeleids);
+    //                 console.log(data);
+    //             }else{
+    //                 console.log('文件未上传成功'+data);
+    //             ;}
+    //         },
+    //         dataType: 'json',
+    //     });
+    //
+    // })
+</script>

@@ -1,0 +1,83 @@
+<admintpl file="header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<!--<li class=""><a href="{:U('slideshow/index')}">轮播图列表</a></li>-->
+			<li class="active"><a href="{:U('slideshow/add')}">新增轮播图</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form" enctype="multipart/form-data" action="{:U('Slideshow/add_post')}">
+			<!--<h3 style="" class="controls">新增轮播图</h3>-->
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">名称:</label>
+					<div class="controls">
+						<input type="text" name="name" id="name" placeholder="请输入轮播图名称" required>
+						<span class="form-required" style="color: red">*</span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">文件:</label>
+					<div class="controls">
+						<input type="file" name="filename" id="filename" placeholder="请选择要上传的文件">
+						<!--<span class="form-required">*</span>-->
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">权重:</label>
+					<div class="controls">
+						<input type="text" name="weight" id="weight" placeholder="请输入权重值(正整数)">
+						<!--<span class="form-required">*</span>-->
+						<p>(权重越高轮播图位置越靠前)</p>
+					</div>
+				</div>
+
+				<div class="control-group">
+					<label class="control-label">URL:</label>
+					<div class="controls">
+						<input type="text" name="link" placeholder="请输入跳转的URL">
+					</div>
+				</div>
+
+			</fieldset>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">{:L('ADD')}</button>
+				<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+</body>
+</html>
+<script>
+	function checkPost(){
+        var re = /^[0-9]+$/ ;
+        var weg = $("#weight").val();
+        var name = $("#name").val();
+        if(name == '' || name == null){
+            alert('轮播图名称必须填写!');
+            return false;
+        }
+        if(!re.test(weg)){
+            alert('权重必须是正整数!');
+            return false;
+		}
+	}
+    // $("#filename").click(function () {
+    //     $.ajax({
+    //         type: 'GET',
+    //         url: '<?php echo U("news/delete_attach")?>',
+    //         data: 'allids='+allids+'&undeleids='+undeleids,
+    //         success: function (data) {
+    //             if(data.code == 0){
+    //                 $(".aids").val(undeleids);
+    //                 console.log(data);
+    //             }else{
+    //                 console.log('文件未上传成功'+data);
+    //             }
+    //         },
+    //         dataType: 'json',
+    //     });
+    //
+    // })
+</script>

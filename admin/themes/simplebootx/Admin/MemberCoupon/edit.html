@@ -1,0 +1,75 @@
+<admintpl file="header" />
+<style>
+</style>
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('member/edit')}">发送优惠券</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form" action="{:U('MemberCoupon/add')}">
+			<!--<h3 style="" class="controls">修改房源标签</h3>-->
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">会员:</label>
+					<div class="controls">
+						<input type="text" name="memberphone" id='memberphone' value="{$data.memberphone}">
+						<input type="hidden" name="mid" id='mid' value="{$data.mid}">
+						<!--<span class="form-required">*</span>-->
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">优惠券:</label>
+					<div class="controls">
+						<select name="cid" id="">
+							<option value="">请选择优惠券</option>
+							<foreach name="couponlist" item="vo">
+								<option value="{$vo.cid}">
+									{$vo.cname}
+								</option>
+							</foreach>
+						</select>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">发放数量:</label>
+					<div class="controls">
+						<input type="number" name="num" id='num' value="1" class="" min="1" max="10"/>
+						<!--<span class="form-required">*</span>-->
+					</div>
+				</div>
+
+			</fieldset>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick="return checkPost()">发放</button>
+				<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+				<!-- <button class="btn js-ajax-close-btn" type="submit">{:L('CLOSE')}</button> -->
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script>
+		$(function() {
+			$(".js-ajax-close-btn").on('click', function(e) {
+				e.preventDefault();
+				Wind.use("artDialog", function() {
+					art.dialog({
+						id : "question",
+						icon : "question",
+						fixed : true,
+						lock : true,
+						background : "#CCCCCC",
+						opacity : 0,
+						content : "您确定需要关闭当前页面嘛？",
+						ok : function() {
+							setCookie('refersh_time_admin_menu_index', 1);
+							window.close();
+							return true;
+						}
+					});
+				});
+			});
+		});
+	</script>
+</body>
+</html>

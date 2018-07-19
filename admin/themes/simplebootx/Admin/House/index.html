@@ -1,0 +1,158 @@
+<admintpl file="header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('house/index')}">房源列表</a></li>
+			<!--<li><a href="{:U('housesource/add')}">新增标签</a></li>-->
+			<!--<li><a href="{:U('slideshow/lists')}">{:L('ADMIN_MENU_LISTS')}</a></li>-->
+		</ul>
+
+		<form class="well form-search" method="post" action="{:U('house/index')}">&nbsp;&nbsp;
+			<select name="housetype" id="">
+				<option value="">全部类型</option>
+				<foreach name="housetype" item="vo">
+					<if condition="$vo.id == $typeid">
+						<option value="{$vo.id}" selected="selected">{$vo.housetype}</option>
+						<else/>
+						<option value="{$vo.id}">{$vo.housetype}</option>
+					</if>
+				</foreach>
+			</select>
+			<select name="online">
+				<option value="">全部房源状态</option>
+				<if condition="$online == 1">
+					<option value="1" selected="selected">上线</option>
+					<option value="-1">下线</option>
+				<elseif condition="$online == -1"/>
+					<option value="1">上线</option>
+					<option value="-1" selected="selected">下线</option>
+				<else />
+					<option value="1">上线</option>
+					<option value="-1">下线</option>
+				</if>
+			</select>
+			<select name="isorder">
+				<option value="">全部预定状态</option>
+				<if condition="$isorder == 1">
+					<option value="1" selected="selected">已预订</option>
+					<option value="-1">未预定</option>
+				<elseif condition="$isorder == -1"/>
+					<option value="1">已预订</option>
+					<option value="-1" selected="selected">未预定</option>
+				<else/>
+					<option value="1">已预订</option>
+					<option value="-1">未预定</option>
+				</if>
+			</select>
+			&nbsp;房源名称关键字：
+			<input type="text" name="keyword" id="keyword" style="width: 200px;" value="{$keyword|default=''}" placeholder="请输入房源名称搜索">
+			<input type="submit" class="btn btn-primary" value="搜索" />
+		</form>
+
+		<form class="js-ajax-form" action="{:U('house/listorders')}" method="post">
+			<!--<div class="table-actions">-->
+				<!--<button class="btn btn-primary btn-small js-ajax-submit" type="submit">{:L('SORT')}</button>-->
+			<!--</div>-->
+			<table class="table table-hover table-bordered table-list" id="menus-table">
+				<thead>
+					<tr>
+						<th width="80">序号</th>
+						<th width="200">房源名称</th>
+						<th width="80">类型</th>
+						<th width="200">价格(元/天)</th>
+						<th width="80">长租折扣</th>
+						<th width="80">房源状态</th>
+						<th width="80">预定状态</th>
+						<th width="180">{:L('ACTIONS')}</th>
+					</tr>
+				</thead>
+				<tbody>
+				<foreach name="house" item="vo">
+					<tr>
+						<td>{$vo.houseid}</td>
+						<td>{$vo.housename}</td>
+						<td>{$vo.typename}</td>
+						<td>{$vo.price}</td>
+						<td>
+							<if condition="$vo.isdiscount == 1">
+								有
+								<else/>
+								无
+							</if>
+						</td>
+						<td>
+							<if condition="$vo.online == 1">
+								上线
+								<else/>
+								下线
+							</if>
+						</td>
+						<td>
+							<if condition="$vo.isorder == 1">
+								已预订
+								<else/>
+								未预定
+							</if>
+						</td>
+						<td>
+							<if condition="$vo.online == 1">
+							<a href="{:U('house/edit',array('houseid'=>$vo['houseid'],'online'=>1))}" >查看</a>/
+								<else/>
+							<a href="{:U('house/edit',array('houseid'=>$vo['houseid'],'online'=>0))}" >修改</a>/
+							</if>
+							<if condition="$vo.online == 1">
+								<!--<a href="#" onclick="online({$vo['houseid']},0)" id="online_"{$vo.houseid}>下线</a>/-->
+								<a href="{:U('house/check_online',array('houseid'=>$vo['houseid'],'online'=>0))}" >下线</a>/
+								<else/>
+								<!--<a href="#" onclick="online({$vo['houseid']},1)" id="online_"{$vo.houseid}>上线</a>/-->
+								<a href="{:U('house/check_online',array('houseid'=>$vo['houseid'],'online'=>1))}" >上线</a>/
+							</if>
+							<a href="{:U('house/orderlist',array('houseid'=>$vo['houseid']))}" >预定情况</a>
+						</td>
+					</tr>
+				</foreach>
+				</tbody>
+			</table>
+			<div class="pagination">{$page}</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script>
+		$(document).ready(function() {
+			Wind.css('treeTable');
+			Wind.use('treeTable', function() {
+				$("#menus-table").treeTable({
+					indent : 20
+				});
+			});
+		});
+
+		setInterval(function() {
+			var refersh_time = getCookie('refersh_time_admin_menu_index');
+			if (refersh_time == 1) {
+				reloadPage(window);
+			}
+		}, 1000);
+		setCookie('refersh_time_admin_menu_index', 0);
+	</script>
+	<script>
+        // function online(houseid,i) {
+		 //    var onl = $("#online_"+houseid);
+			// $.ajax({
+			// 	type: 'GET',
+			// 	async:false,
+			// 	url: '<?php echo U("house/check_online")?>',
+			// 	data: 'online='+i+'&houseid='+houseid,
+			// 	success: function (data) {
+			// 	    if(data){
+			// 	        history.go(0);
+			// 		}
+			// 	},
+			// 	dataType: 'json',
+			// });
+        //
+        // }
+	</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<admintpl file="header" />
+<style>
+	.reach{
+		width: 100px;
+		margin-left: 6px;
+		margin-right: 6px;
+	}
+	.discount{
+		width: 100px;
+		margin-left: 6px;
+		margin-right: 6px;
+	}
+</style>
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="#" style="color:#2c3e50 "><h3>新增优惠券</h3></a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form" enctype="multipart/form-data" action="{:U('coupon/add_post')}">
+			<!--<h3 style="" class="controls">新增房源标签</h3>-->
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">优惠券名称:</label>
+					<div class="controls">
+						<input type="text" name="cname" id="cname" placeholder="请输入优惠券名称" required>
+						<span class="form-required" style="color: red">*</span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">优惠券说明:</label>
+					<div class="controls">
+						<textarea type="text" name="cintro" id="cintro" placeholder="请输入优惠券说明" required style="width: 484px; height: 83px;" ></textarea>
+						<span class="form-required" style="color: red">*</span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">优惠券使用截止日期:</label>
+					<div class="controls">
+						<input type="text" name="endtime" id='endtime' value="" class="js-datetime" placeholder="请选择优惠券使用截止日期" required />
+						<span class="form-required" style="color: red;">*</span>
+					</div>
+				</div>
+
+				<div class="control-group">
+					<label class="control-label">优惠券使用条件:</label>
+					<div class="controls">
+						满<input type="text" class="reach" name="reach" id='reach' value="" placeholder="(元)" />元
+						减 <input type="text" class="discount" name="discount" id='discount' value="" placeholder="(元)" />元
+						<!--<span class="form-required" style="color: red;">*</span>-->
+					</div>
+				</div>
+			</fieldset>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">新增</button>
+				<a class="btn" href="javascript:history.back(-1);">取消</a>
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+
+</body>
+</html>
+
+<!-- 视实际需要决定是否引入jquery.cookie-1.4.1.min.js-->
+
+
+<script>
+	function checkPost(){
+        var ownerID = $("#ownerID").val();
+        var ownerphone = $("#ownerphone").val();
+        var starttime = $("#starttime").val();
+        var endtime = $("#endtime").val();
+        var aids = $(".aids").val();
+        var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+
+        var stime = new Date(starttime);
+        var stime = stime.getTime();
+        var etime = new Date(endtime);
+        var etime = etime.getTime();
+        if(stime && etime){
+            if(stime > etime || stime === etime){
+                alert('入住时间必须小于退房时间!');
+                return false;
+			}
+		}
+
+		var cash= $("#cash").val();
+		var houseprice= $("#houseprice").val();
+        var re = /^[0-9]+$/ ;
+        if(cash){
+            if(!re.test(cash)){
+                alert('押金必须是正整数!');
+                return false;
+            }
+		}
+
+
+	}
+
+  	function checkOnline() {
+	    $("#online").val(1);
+	    checkPost();
+    }
+
+    function addspecial() {
+        var ele="<p class=\"sp\" style=\"margin-top: 15px\">\n" +
+            " <input type=\"text\" name=\"specialrent[]\" id='' value=\"\" placeholder=\"\">(元/天)\n" +
+            "<input type=\"text\" name=\"specialtime[]\" class=\"js-datetime\" value=\"{$formget.time|default=''}\" style=\"width: 120px;\" autocomplete=\"off\">\n" +
+            "<input onclick=\"delspecial(this)\" type='button' value='删除'/>" +
+            "</p>";
+        $(".sp").parent().append(ele);
+    }
+	function delspecial(ts) {
+        $(ts).parent().remove()
+    }
+
+
+    var isChecked = $("#lz").is(':checked');
+    // var isChecked = $("#lz").prop('checked');
+	var flag = false;
+    $("#lz").click(function () {
+        if(isChecked){
+            flag = true;
+        }
+    })
+    // alert(flag);
+	if(flag){
+        $(".reach").prop('disabled',true);
+        $(".discount").prop('disabled',true);
+	}else{
+        $(".reach").prop('disabled',false);
+        $(".discount").prop('disabled',false);
+    }
+
+    $('#starttime').datepicker({
+        dateFormat: 'yy-mm-dd'
+    });
+</script>

@@ -1,0 +1,91 @@
+<admintpl file="header" />
+<link rel="stylesheet" href="__ROOT__/easyupload/easy-upload.css">
+<style>
+	.reach{
+		width: 100px;
+		margin-left: 6px;
+		margin-right: 6px;
+	}
+	.discount{
+		width: 100px;
+		margin-left: 6px;
+		margin-right: 6px;
+	}
+</style>
+</head>
+<body>
+	<div class="wrap">
+		<form method="post" class="form-horizontal js-ajax-form" action="{:U('coupon/edit_post')}">
+			<!--<h3 style="" class="controls">修改房源标签</h3>-->
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">优惠券名称:</label>
+					<div class="controls">
+						<input type="text" name="cname" id='cname' value="{$data.cname}">
+						<!--<span class="form-required">*</span>-->
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">优惠券说明:</label>
+					<div class="controls">
+						<textarea type="text" name="cintro" id="cintro"   style="width: 484px; height: 83px;" >
+							{$data.cintro}
+						</textarea>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">优惠券使用截止日期:</label>
+					<div class="controls">
+						<input type="text" name="endtime" id='endtime' value="{$data.dateline}" class="js-datetime"  />
+						<!--<span class="form-required">*</span>-->
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">优惠券使用条件:</label>
+					<div class="controls">
+							满<input type="text" class="reach" name="reach" id='reach' value="{$data['cond'].reach}" placeholder="(元)" />元
+							减 <input type="text" class="discount" name="discount" id='discount' value="{$data['cond'].discount}" placeholder="(元)" />元
+						<!--<span class="form-required">*</span>-->
+					</div>
+				</div>
+
+			</fieldset>
+			<div class="form-actions">
+				<input type="hidden" name="id" value="{$data.id}" />
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick="return checkPost()">{:L('SAVE')}</button>
+				<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+				<!-- <button class="btn js-ajax-close-btn" type="submit">{:L('CLOSE')}</button> -->
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script src="__ROOT__/easyupload/vendor/jquery.cookie-1.4.1.min.js"></script>
+	<script src="__ROOT__/easyupload/easyUpload.js"></script>
+	<script>
+		$(function() {
+			$(".js-ajax-close-btn").on('click', function(e) {
+				e.preventDefault();
+				Wind.use("artDialog", function() {
+					art.dialog({
+						id : "question",
+						icon : "question",
+						fixed : true,
+						lock : true,
+						background : "#CCCCCC",
+						opacity : 0,
+						content : "您确定需要关闭当前页面嘛？",
+						ok : function() {
+							setCookie('refersh_time_admin_menu_index', 1);
+							window.close();
+							return true;
+						}
+					});
+				});
+			});
+		});
+	</script>
+
+
+
+</body>
+</html>

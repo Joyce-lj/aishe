@@ -1,0 +1,68 @@
+<admintpl file="header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#">退房提醒</a></li>
+			<!--<li><a href="{:U('housesource/add')}">新增标签</a></li>-->
+			<!--<li><a href="{:U('slideshow/lists')}">{:L('ADMIN_MENU_LISTS')}</a></li>-->
+		</ul>
+
+
+
+		<form class="js-ajax-form" action="#" method="post">
+			<table class="table table-hover table-bordered table-list" id="menus-table">
+				<thead>
+					<tr>
+						<th width="80">序号</th>
+						<th width="200">下单时间</th>
+						<th width="200">用户手机号</th>
+						<th width="200">预定房源</th>
+						<th width="200">入住时间</th>
+						<th width="200">退房时间</th>
+						<th width="200">提醒类型</th>
+					</tr>
+				</thead>
+				<tbody>
+				<foreach name="checkout" item="vo">
+					<tr>
+						<td>{$vo.houseid}</td>
+						<td>{$vo.createtime|date="Y-m-d H:i",###}</td>
+						<td>{$vo.orderphone}</td>
+						<td>{$vo.housename}</td>
+						<td>{$vo.checkin_time|date="Y-m-d H:i",###}</td>
+						<td>{$vo.checkout_time|date="Y-m-d H:i",###}</td>
+						<td>
+							退房提醒
+						</td>
+					</tr>
+				</foreach>
+				</tbody>
+			</table>
+			<div class="pagination">{$page}</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script>
+		$(document).ready(function() {
+			Wind.css('treeTable');
+			Wind.use('treeTable', function() {
+				$("#menus-table").treeTable({
+					indent : 20
+				});
+			});
+		});
+
+		setInterval(function() {
+			var refersh_time = getCookie('refersh_time_admin_menu_index');
+			if (refersh_time == 1) {
+				reloadPage(window);
+			}
+		}, 1000);
+		setCookie('refersh_time_admin_menu_index', 0);
+	</script>
+	<script>
+
+	</script>
+</body>
+</html>

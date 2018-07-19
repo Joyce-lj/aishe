@@ -1,0 +1,108 @@
+<admintpl file="header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('house/index')}">订单列表</a></li>
+			<!--<li><a href="{:U('housesource/add')}">新增标签</a></li>-->
+			<!--<li><a href="{:U('slideshow/lists')}">{:L('ADMIN_MENU_LISTS')}</a></li>-->
+		</ul>
+
+		<form class="well form-search" method="post" action="{:U('houseorder/index')}">&nbsp;&nbsp;
+			订单状态:
+			<select name="orderstate" id="" style="width: 130px;">
+					<option value="">全部订单状态</option>
+				<for start="1" end="intval($statecount + 1)">
+					<if condition="$i eq $orderstate">
+						<option value="{$i}" selected="selected">{$state[$i]}</option>
+					</if>
+						<option value="{$i}">{$state[$i]}</option>
+				</for>
+			</select>
+			手机号或房源名称关键字：
+			<input type="text" name="keyword" id="keyword" style="width: 300px;" value="{$keyword|default=''}" placeholder="请输入用户手机号或者房源名称搜索">
+			<input type="submit" class="btn btn-primary" value="搜索" />
+		</form>
+
+		<form class="js-ajax-form" action="{:U('houseorder/listorders')}" method="post">
+			<table class="table table-hover table-bordered table-list" id="menus-table">
+				<thead>
+					<tr>
+						<th width="80">序号</th>
+						<th width="200">下单时间</th>
+						<th width="200">用户手机号</th>
+						<th width="200">预定房源</th>
+						<th width="150">订单金额(元)</th>
+						<th width="100">订单状态</th>
+						<th width="180">{:L('ACTIONS')}</th>
+					</tr>
+				</thead>
+				<tbody>
+				<foreach name="houseorder" item="vo">
+					<tr>
+						<td>{$vo.orderid}</td>
+						<td>{$vo.createtime|date="Y-m-d H:i",###}</td>
+						<td>{$vo.orderphone}</td>
+						<td>{$vo.housename}</td>
+						<td>{$vo.discount_cost}</td>
+						<td>
+							<switch name="vo.orderstate">
+								<case value="1">已支付,未确认</case>
+								<case value="2">已支付,已确认</case>
+								<case value="3">已入住</case>
+								<case value="4">已退房,未退押金</case>
+								<case value="5">已退房,已退押金</case>
+								<case value="6">已失效</case>
+								<case value="7">已退款</case>
+								<default />未知类型
+							</switch>
+						</td>
+						<td>
+							<a href="{:U('houseorder/orderDetail',array('orderid'=>$vo['orderid']))}" >订单详情</a>
+						</td>
+					</tr>
+				</foreach>
+				</tbody>
+			</table>
+			<div class="pagination">{$page}</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script>
+		$(document).ready(function() {
+			Wind.css('treeTable');
+			Wind.use('treeTable', function() {
+				$("#menus-table").treeTable({
+					indent : 20
+				});
+			});
+		});
+
+		setInterval(function() {
+			var refersh_time = getCookie('refersh_time_admin_menu_index');
+			if (refersh_time == 1) {
+				reloadPage(window);
+			}
+		}, 1000);
+		setCookie('refersh_time_admin_menu_index', 0);
+	</script>
+	<script>
+        // function online(houseid,i) {
+		 //    var onl = $("#online_"+houseid);
+			// $.ajax({
+			// 	type: 'GET',
+			// 	async:false,
+			// 	url: '<?php echo U("house/check_online")?>',
+			// 	data: 'online='+i+'&houseid='+houseid,
+			// 	success: function (data) {
+			// 	    if(data){
+			// 	        history.go(0);
+			// 		}
+			// 	},
+			// 	dataType: 'json',
+			// });
+        //
+        // }
+	</script>
+</body>
+</html>

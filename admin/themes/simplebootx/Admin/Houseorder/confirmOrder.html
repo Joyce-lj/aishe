@@ -1,0 +1,154 @@
+<admintpl file="header" />
+<style>
+
+</style>
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('houseorder/orderdetail')}">订单详情</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form" action="{:U('houseorder/edit_post')}">
+			<!--<h3 style="" class="controls">修改房源标签</h3>-->
+			<input type="hidden" value="{$online}" name="state" id="state">
+			<fieldset>
+				<table class="table table-hover table-bordered table-list" id="menus-table">
+					<tbody>
+						<tr>
+							<th width="100">房源名称</th>
+							<td width="">{$orderdetail.housename}</td>
+						<tr>
+
+						</tr>
+							<th width="100">预订人手机号</th>
+							<td width="">{$orderdetail.orderphone}</td>
+						<tr>
+
+						</tr>
+							<th width="100">订单状态</th>
+							<td width="">
+								<switch name="orderdetail.orderstate">
+									<case value="1">已支付,未确认</case>
+									<case value="2">已支付,已确认</case>
+									<case value="3">已入住</case>
+									<case value="4">已退房,未退押金</case>
+									<case value="5">已退房,已退押金</case>
+									<case value="6">已失效</case>
+									<case value="7">已退款</case>
+									<default />未知类型
+								</switch>
+
+							</td>
+						<tr>
+
+						</tr>
+							<th width="100">押金（元）</th>
+							<td width="">{$orderdetail.cash}</td>
+						<tr>
+						</tr>
+							<th width="100">入住时间</th>
+							<td width="">{$orderdetail.checkin_time|date="Y-m-d H:i",###}</td>
+						<tr>
+						</tr>
+							<th width="100">退房时间</th>
+							<td width="">{$orderdetail.checkout_time|date="Y-m-d H:i",###}</td>
+						<tr>
+						</tr>
+							<th width="100">入住天数</th>
+						<php>$diff = intval(intval($orderdetail['checkout_time'])-intval($orderdetail['checkin_time'])) </php>
+						<php>$days = floor($diff/86400) </php>
+							<td width="">{$days}</td>
+						<tr>
+						</tr>
+							<th width="100">享受折扣</th>
+							<td width="">
+								<if condition="$orderdetail.isdiscount == 1">
+								<php>$item =  $orderdetail['discount2'];</php>
+										<if condition="$days gt $item[2]['days']">
+											享受{$item[2].discount}折
+											<elseif condition="$days gt $item[1]['days']"/>
+											享受{$item[1].discount}折
+											<elseif condition="$days gt $item[0]['days']"/>
+											享受{$item[0].discount}折
+											<else/>
+											无折扣
+										</if>
+								<else/>
+									无折扣
+								</if>
+							</td>
+						<tr>
+						</tr>
+							<th width="100">优惠券(元)</th>
+						<!--房屋总价=日租价*入住天数,房屋总价和优惠满减金额做对比-->
+							<td>{$orderdetail['yh'][$index-1]['cname']}</td>
+						<tr>
+						</tr>
+							<th width="100">应付金额(元)</th>
+							<td width="">{$realmoney}</td>
+						<tr>
+					</tbody>
+				</table>
+				<input type="hidden" name="online" value="0" id="online">
+			</fieldset>
+			<div class="form-actions">
+
+				<switch name="orderdetail.orderstate">
+					<case value="1">
+						<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">确认订单</button>
+						<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">退款</button>
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+					</case>
+					<case value="2">已支付,已确认</case>
+					<case value="3">已入住</case>
+					<case value="4">已退房,未退押金</case>
+					<case value="5">已退房,已退押金</case>
+					<case value="6">已失效</case>
+					<case value="7">已退款</case>
+					<default />未知类型
+				</switch>
+
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">{:L('ADD')}</button>
+				<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+
+	<script>
+		$(function() {
+		    var state = $("#state").val();
+		    if(state == 1){
+                $("input[type='text']").attr("readonly","readonly");
+                $("textarea").attr("readonly","readonly");
+                $("select").attr("readonly","readonly");
+			}else{
+                $("input[type='text']").removeAttr("readonly");
+                $("textarea").removeAttr("readonly");
+                $("select").removeAttr("readonly");
+			}
+
+			$(".js-ajax-close-btn").on('click', function(e) {
+				e.preventDefault();
+				Wind.use("artDialog", function() {
+					art.dialog({
+						id : "question",
+						icon : "question",
+						fixed : true,
+						lock : true,
+						background : "#CCCCCC",
+						opacity : 0,
+						content : "您确定需要关闭当前页面嘛？",
+						ok : function() {
+							setCookie('refersh_time_admin_menu_index', 1);
+							window.close();
+							return true;
+						}
+					});
+				});
+			});
+		});
+	</script>
+
+</body>
+</html>

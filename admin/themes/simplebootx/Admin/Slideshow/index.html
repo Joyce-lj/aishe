@@ -1,0 +1,102 @@
+<admintpl file="header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('slideshow/index')}">轮播图列表</a></li>
+			<!--<li><a href="{:U('slideshow/add')}">添加轮播图</a></li>-->
+			<!--<li><a href="{:U('slideshow/lists')}">{:L('ADMIN_MENU_LISTS')}</a></li>-->
+		</ul>
+
+		<form class="well form-search" method="post" action="{:U('Slideshow/index')}">&nbsp;&nbsp;
+			<!--时间：-->
+			<!--<input type="text" name="start_time" class="js-datetime" value="{$formget.start_time|default=''}" style="width: 120px;" autocomplete="off">- -->
+			<!--<input type="text" class="js-datetime" name="end_time" value="{$formget.end_time|default=''}" style="width: 120px;" autocomplete="off"> &nbsp; &nbsp;-->
+			轮播图名称关键字：
+			<input type="text" name="keyword" id="keyword" style="width: 200px;" value="{$keyword|default=''}" placeholder="请输入轮播图名称关键字...">
+
+			<input type="submit" class="btn btn-primary" value="搜索" />
+			<!--<a class="btn btn-danger" href="{:U('Slideshow/index')}">清空</a>-->
+		</form>
+
+		<form class="js-ajax-form" action="{:U('Slideshow/listorders')}" method="post">
+			<!--<div class="table-actions">-->
+				<!--<button class="btn btn-primary btn-small js-ajax-submit" type="submit">{:L('SORT')}</button>-->
+			<!--</div>-->
+			<table class="table table-hover table-bordered table-list" id="menus-table">
+				<thead>
+					<tr>
+						<th width="80">序号</th>
+						<th width="50">权重</th>
+						<th>轮播图名称</th>
+						<th>图片</th>
+						<th width="200">上传时间</th>
+						<th width="180">{:L('ACTIONS')}</th>
+					</tr>
+				</thead>
+				<tbody>
+				<foreach name="slideshow" item="vo">
+					<tr>
+						<td>{$vo.id}</td>
+						<td>{$vo.weight}</td>
+						<td>{$vo.name}</td>
+						<td><img src="__ROOT__/uploads/slideshow/{$vo.savepath}{$vo.savename}" alt="" width="220px"></td>
+						<td>{$vo.createtime|date="Y-m-d H:i:s",###}</td>
+						<td>
+							<a href="{:U('slideshow/edit',array('id'=>$vo['id']))}" >修改</a>/
+							<a href="javascript:void(0)" onclick="del({$vo['id']})">删除</a>
+						</td>
+					</tr>
+				</foreach>
+				</tbody>
+			</table>
+			<div class="pagination">{$page}</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script>
+		$(document).ready(function() {
+			Wind.css('treeTable');
+			Wind.use('treeTable', function() {
+				$("#menus-table").treeTable({
+					indent : 20
+				});
+			});
+		});
+
+		setInterval(function() {
+			var refersh_time = getCookie('refersh_time_admin_menu_index');
+			if (refersh_time == 1) {
+				reloadPage(window);
+			}
+		}, 1000);
+		setCookie('refersh_time_admin_menu_index', 0);
+	</script>
+
+	<script>
+        //删除
+        function del(id){
+            var msg = "您真的确定要删除吗？请确认！";
+            if (confirm(msg)==true){
+                $.ajax({
+                    type: 'GET',
+                    url: '<?php echo U("slideshow/delete")?>',
+                    data: 'id='+id,
+                    success: function (data) {
+                        if(data){
+                            //拼接form表单
+                            console.log(data);
+                            history.go(0);
+                        }else{
+                            alert('操作失败!');
+                        }
+                    },
+                    dataType: 'json',
+                });
+            } else{
+                return false;
+            }
+        }
+	</script>
+</body>
+</html>
