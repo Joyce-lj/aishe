@@ -1,0 +1,482 @@
+<admintpl file="header" />
+<link rel="stylesheet" href="__ROOT__/easyupload/easy-upload.css">
+<style>
+	.easy_upload_delbtn{
+		display: none;
+	}
+	.easy_upload_upbtn{
+		display: none;
+	}
+	.easyUploadIcon{
+	}
+	.easy_upload_queue_item{
+
+	}
+	.reach{
+		width: 100px;
+		margin-left: 6px;
+		margin-right: 6px;
+	}
+	.discount{
+		width: 100px;
+		margin-left: 6px;
+		margin-right: 6px;
+	}
+	.addele{
+		width: 48px;
+		height: 24px;
+		cursor: pointer;
+		border: 1px solid black;
+	}
+</style>
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<!--<li><a href="#" style="color:#2c3e50 "><h3>新增房源</h3></a></li>-->
+			<!--<li><a href="{:U('housesource/index')}">房源列表</a></li>-->
+			<li class="active"><a href="#">新增房源</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form" enctype="multipart/form-data" action="{:U('house/add_post')}">
+			<!--<h3 style="" class="controls">新增房源标签</h3>-->
+			<fieldset>
+				<div class="control-group">
+					<label class="control-label">房源名称:</label>
+					<div class="controls">
+						<input type="text" name="housename" id="housename" placeholder="请输入房源名称" required>
+						<span class="form-required" style="color: red">*</span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">房源类型:</label>
+					<div class="controls">
+						<select name="housetag">
+							<foreach name="housetag" item="vo">
+								<option value="{$vo.id}">{$vo.typename}</option>
+							</foreach>
+						</select>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">房源介绍:</label>
+					<div class="controls">
+						<textarea type="text" name="houseintro" id='houseintro' value="" style="width: 484px; height: 83px;" placeholder="请输入房源介绍" required></textarea>
+						<span class="form-required" style="color: red;">*</span>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">房源预定说明:</label>
+					<div class="controls">
+						<textarea type="text" name="houseorder" id='houseorder' value="" style="width: 484px; height: 83px;" placeholder="请输入房源预定说明" required></textarea>
+						<span class="form-required" style="color: red;">*</span>
+					</div>
+				</div>
+
+				<div class="control-group">
+					<label class="control-label">房屋详情设定:</label>
+					<hr style="margin-top:36px;margin-bottom: 12px;"/>
+					<div class="controls">
+						<!--<p style="border-bottom: grey">房屋详情设定</p>-->
+						<table>
+							<tr>
+								<td><span>房屋类型:</span></td>
+								<td><span>卫生间数量:</span></td>
+								<td><span>最短入住时间(天):</span></td>
+							</tr>
+							<tr>
+								<td>
+									<select type="text" name="housetype">
+                                        <foreach name="housetype" item="vo">
+                                            <option value="{$vo.id}">{$vo.housetype}</option>
+                                        </foreach>
+									</select>
+								</td>
+								<td>
+									<select name="bathroom">
+										<for start="1" end="11">
+											<option value="{$i}">{$i}</option>
+										</for>
+									</select>
+								</td>
+								<td>
+									<select name="mindays">
+										<for start="1" end="11">
+											<option value="{$i}">{$i}</option>
+										</for>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+
+				<div class="control-group">
+					<div class="controls">
+						<table cellspacing="102">
+							<tr>
+								<td><span>入住时间:</span></td>
+								<td><span>退房时间:</span></td>
+								<td><span>线上押金(元):</span></td>
+							</tr>
+							<tr>
+                                <td>
+                                    <input type="text" name="starttime" id='starttime' class="js-datetime" value="{$formget.starttime|default=''}" style="width: 205px;" autocomplete="off">
+									<i style="width: 36px;position: absolute;cursor: pointer" class="js-datetime"><img src="__TMPL__Public/assets/images/cal.png" alt="" style="margin-left:-36px;margin-top: -2px"></i>
+								</td>
+								<td>
+                                    <input type="text"  name="endtime" id="endtime" class="js-datetime" value="{$formget.endtime|default=''}" style="width: 205px;" autocomplete="off">
+									<i style="width: 36px;position: absolute;cursor: pointer"><img onclick="cal()" src="__TMPL__Public/assets/images/cal.png" alt=""  style="margin-left:-36px;margin-top: -2px"></i>
+                                </td>
+								<td>
+                                    <input type="text" value="" name="cash" id="cash" style="width: 205px;">
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">最多入住人数:</label>
+					<div class="controls">
+						<select name="maxmembers">
+							<for start="1" end="11">
+								<option value="{$i}">{$i}</option>
+							</for>
+						</select>
+					</div>
+				</div>
+                <div class="control-group">
+                    <label class="control-label">房屋日单价(元/天):</label>
+                    <div class="controls">
+						<input type="text" name="price" id='houseprice' value="" placeholder="请输入房屋日单价(元/天)" required>
+                        <span class="form-required" style="color: red;">*</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <p><input type="checkbox" id="lz" class="lz">&nbsp;&nbsp;&nbsp;&nbsp;长租折扣 请输入长租折扣</p>
+                       <p> 满<input type="text" name="reach[]" class='reach' value="" placeholder="" disabled>天<input type="text" name="discount[]" class="discount" value="" placeholder="" disabled>折扣</p>
+                        <p>满<input type="text" name="reach[]" class='reach' value="" placeholder="" disabled>天<input type="text" name="discount[]" class="discount" value="" placeholder="" disabled>折扣</p>
+                        <p>满<input type="text" name="reach[]" class='reach' value="" placeholder="" disabled>天<input type="text" name="discount[]"  class="discount" value="" placeholder="" disabled>折扣</p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <p><input type="checkbox" id="tj">&nbsp;&nbsp;&nbsp;&nbsp;特殊价格设定</p>
+                        <p class="sp">
+                            <input type="text" name="specialrent[]" class="specialrent" value="" placeholder="" disabled>(元/天)
+                            <input type="text" name="specialtime[]" class="js-datetime specialtime" value="{$formget.time|default=''}" style="width: 120px;" autocomplete="off" disabled>
+							<input type="button" value="添加" onclick="addspecial()">
+                        </p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+					<label for="" class="control-label">选择房源所在城市:</label>
+                    <div class="controls">
+                        <select name="housecity">
+							<option value="">选择房源所在城市</option>
+							<foreach name="provinces" item="vo">
+								<option value="{$vo.id}">{$vo.province}</option>
+							</foreach>
+                        </select>
+                    </div>
+                </div>
+				<div class="control-group">
+					<label for="" class="control-label">房源位置:</label>
+					<div class="controls">
+						<input type="text" placeholder="请输入房源位置" name="houseposition" id="houseposition">
+					</div>
+				</div>
+                <div class="control-group">
+					<label for="" class="control-label">房源具体位置</label>
+                    <div class="controls">
+                        <p style=""><input type="text" name="houseaddress" placeholder="请输入房源具体位置"><button>生成</button></p>
+                        地图插件生成
+                    </div>
+                </div>
+				<div class="control-group">
+					<label class="control-label">房源照片:</label>
+					<div class="controls">
+						<input type="text" name="aids" class="aids" value="" required style="display: none">
+						<div id="easyContainer">
+						</div>
+					</div>
+				</div>
+                <div class="control-group">
+					<label for="" class="control-label">房主身份证号码:</label>
+                    <div class="controls">
+                        <input type="text" placeholder="请输入房主身份证号码" name="ownerID" id="ownerID">
+                    </div>
+                </div>
+                <div class="control-group">
+					<label for="" class="control-label">房主姓名:</label>
+                    <div class="controls">
+                        <input type="text" placeholder="请输入房主姓名" name="ownername">
+                    </div>
+                </div>
+                <div class="control-group">
+					<label for="" class="control-label">房主手机号:</label>
+                    <div class="controls">
+                        <input type="text" placeholder="请输入房主手机号" name="ownerphone" id="ownerphone">
+                    </div>
+                </div>
+                <div class="control-group">
+					<label for="" class="control-label">上传营业执照:</label>
+                    <div class="controls">
+						<input type="file" placeholder="" name="ownerlicense" id="ownerlicense">
+                    </div>
+                </div>
+				<input type="hidden" name="online" value="0" id="online">
+			</fieldset>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">新增</button>
+				<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkOnline()">新增并上线</button>
+				<a class="btn" href="javascript:history.back(-1);">取消</a>
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script src="__ROOT__/easyupload/vendor/jquery.cookie-1.4.1.min.js"></script>
+	<script src="__ROOT__/easyupload/easyUpload.js"></script>
+</body>
+</html>
+
+<!-- 视实际需要决定是否引入jquery.cookie-1.4.1.min.js-->
+
+<script>
+	// $("easyUploadIcon").attr('data-checked','yes');
+    $('#easyContainer').easyUpload({
+        allowFileTypes: '*.jpg;*.JPG;*.doc;*.DOC;*.docx;*.DOCX;*.pdf;*.PDF;*.txt;*.TXT;*.zip;*.ZIP;*.tif;*.TIF;',//允许上传文件类型，格式';*.doc;*.pdf'
+        allowFileSize: 100000,//允许上传文件大小(KB)
+        selectText: '选择文件',//选择文件按钮文案
+        multi: true,//是否允许多文件上传
+        multiNum:30,//多文件上传时允许的文件数
+        showNote: true,//是否展示文件上传说明
+        note: '提示：最多上传<span style="color: ">30</span>个文件，支持格式为jpg,png',//文件上传说明
+        showPreview: true,//是否显示文件预览
+        url: '{:U("house/upload")}',//上传文件地址
+        fileName: 'file',//文件filename配置参数
+        formParam: {
+            // token: $.cookie('token_cookie')//不需要验证token时可以去掉
+        },//文件filename以外的配置参数，格式：{key1:value1,key2:value2}
+        timeout: 30000,//请求超时时间
+        okCode: 200,//与后端返回数据code值一致时执行成功回调，不配置默认200
+        successFunc: function(res) {
+            arr = new Array();
+            len = (res.success).length;
+            for(i=0;i<len;i++){
+                arr.push(res.success[i]['aid']);
+            }
+            ids= arr.join(',');
+            $(".aids").val(ids);
+
+            //如果文件名没有填写,则默认显示第一个上传文件的文件名
+            // var name = $("input[name='title']").val();
+            //     var dataindex = $("li[data-index='0']").find('.easy_upload_filename').text();
+            //     var extindex = dataindex.lastIndexOf(".");
+            //     var ext = dataindex.substr(extindex);
+            //     var name = dataindex.replace(ext,'');
+                // $("input[name='title']").val(name);
+            console.log('成功回调',res);
+        },//上传成功回调函数
+        errorFunc: function(res) {
+            console.log('失败回调', res);
+        },//上传失败回调函数
+        deleteFunc: function(res) {
+            allids=  $(".aids").val();
+            ids = new Array();
+            len = (res.success).length;
+            for(i=0;i<len;i++){
+                ids.push(res.success[i]['aid']);
+            }
+            undeleids= ids.join(',');
+
+            //  console.log('删除回调', res);
+            $.ajax({
+                type: 'GET',
+                url: '<?php echo U("house/delete_attach")?>',
+                data: 'allids='+allids+'&undeleids='+undeleids,
+                success: function (data) {
+                    if(data.code == 0){
+                        $(".aids").val(undeleids);
+                        console.log(data);
+                    }else{
+                        console.log('文件未上传成功'+data);
+                    }
+                },
+                dataType: 'json',
+            });
+
+        }//删除文件回调函数
+    });
+</script>
+<script>
+	function checkPost(){
+        var ownerID = $("#ownerID").val();
+        var ownerphone = $("#ownerphone").val();
+        var starttime = $("#starttime").val();
+        var endtime = $("#endtime").val();
+        var aids = $(".aids").val();
+        var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+        if(ownerID){
+            if(reg.test(ownerID) === false)
+            {
+                alert("身份证号码输入不合法!");
+                return  false;
+            }
+        }
+        var stime = new Date(starttime);
+        var stime = stime.getTime();
+        var etime = new Date(endtime);
+        var etime = etime.getTime();
+        if(stime && etime){
+            if(stime > etime || stime === etime){
+                alert('入住时间必须小于退房时间!');
+                return false;
+			}
+		}
+
+		var cash= $("#cash").val();
+		var houseprice= $("#houseprice").val();
+        var re = /^[0-9]+$/ ;
+        if(cash){
+            if(!re.test(cash)){
+                alert('押金必须是正整数!');
+                return false;
+            }
+		}
+        if(houseprice){
+            if(!re.test(houseprice)){
+                alert('房屋日单价必须是正整数!');
+                return false;
+            }
+        }
+
+
+        if(aids == '' || aids == null){
+            alert('房源照片还没有上传哦!');
+            return false;
+		}
+
+	}
+
+  	function checkOnline() {
+	    $("#online").val(1);
+	    checkPost();
+    }
+
+    function addspecial() {
+        var ele="<p class=\"sp\">" +
+            " <input type=\"text\" name=\"specialrent[]\" class='specialrent' value=\"\" placeholder=\"\" disabled>(元/天)\n" +
+            "<input type=\"text\" name=\"specialtime[]\" class=\"js-datetime specialtime\" value=\"{$formget.time|default=''}\" style=\"width: 120px;\" autocomplete=\"off\" disabled>\n" +
+            "<input onclick=\"delspecial(this)\" type='button' value='删除'/>" +
+            "</p>";
+        $(".sp").parent().append(ele);
+        date();
+    }
+	function delspecial(ts) {
+        $(ts).parent().remove()
+    }
+
+
+	var flag = false;
+    $(".lz").click(function () {
+        if($(this).is(':checked')){
+            $(".lz").attr("checked","checked");
+            flag = false;
+            disabled();
+            // check_rent();
+        }else{
+            $(".lz").removeAttr('checked');
+            flag = true;
+            disabled();
+        }
+    })
+
+    $("#tj").click(function () {
+        if($(this).is(':checked')){
+            $("#tj").attr("checked","checked");
+            flag = false;
+            price_disabled();
+            // var specialprice = $('.specialrent');
+            // for(var i=0;i<specialprice.length;i++){
+            //     if(!re.test(specialprice[i])){
+            //         alert('特殊价格必须是正整数!');
+            //         return false;
+            //     }
+            // }
+        }else{
+            $("#tj").removeAttr('checked');
+            flag = true;
+            price_disabled();
+        }
+    })
+
+    function disabled() {
+        if(flag){
+            $(".reach").prop('disabled',true);
+            $(".discount").prop('disabled',true);
+        }else{
+            $(".reach").prop('disabled',false);
+            $(".discount").prop('disabled',false);
+        }
+	}
+
+	function check_rent(){
+        var reach = $('.reach');
+        for(var i=0;i<reach.length;i++){
+            if(!re.test(reach[i])){
+                alert('长租天数必须是正整数!');
+                return false;
+            }
+        }
+        var discount = $('.discount');
+        for(var i=0;i<discount.length;i++){
+            if(!re.test(discount[i])){
+                alert('折扣数必须是正整数!');
+                return false;
+            }
+        }
+	}
+    function price_disabled() {
+        if(flag){
+            $(".specialrent").prop('disabled',true);
+            $(".specialtime").prop('disabled',true);
+        }else{
+            $(".specialrent").prop('disabled',false);
+            $(".specialtime").prop('disabled',false);
+        }
+    }
+
+	function date() {
+        var dateTimeInput = $("input.js-datetime");
+        if (dateTimeInput.length) {
+            Wind.use('datePicker', function () {
+                dateTimeInput.datePicker({
+                    time: true,
+					// format: 'yyyy'
+                });
+            });
+        }
+    }
+
+    function datetime() {
+        var dateTimeInput = $("input.js-datetime");
+        if (dateTimeInput.length) {
+            Wind.use('datePicker', function () {
+                dateTimeInput.datePicker({
+                    time: true,
+                    // format: 'yyyy'
+                });
+            });
+        }
+    }
+    function cal() {
+        // alert(111);
+        // datetime();
+        $("#endtime").addClass('js-datetime');
+        $("#endtime").attr("autofocus",'autofocus');
+
+    }
+</script>
