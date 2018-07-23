@@ -162,6 +162,31 @@
 				</div>
 
 				<div class="control-group">
+					<label class="control-label">房屋面积:</label>
+					<div class="controls">
+						<input type="text" name="housearea" value="{$data['housearea']}">
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label">房屋床类型:</label>
+					<div class="controls">
+						<select name="bedtype">
+							<!--<option value="">请选择床的类型</option>-->
+							<if condition="$data['bedtype'] == '大床'">
+								<option value="">请选择床的类型</option>
+								<option value="大床" selected="selected">{$data['bedtype']}</option>
+								<option value="双床">双床</option>
+								<else/>
+								<option value="">请选择床的类型</option>
+								<option value="大床">大床</option>
+								<option value="$data['bedtype']">{$data['bedtype']}</option>
+							</if>
+
+						</select>
+					</div>
+				</div>
+
+				<div class="control-group">
 					<label class="control-label">房屋日单价(元/天):</label>
 					<div class="controls">
 						<input type="text" name="price" id='houseprice' value="{$data.price}" placeholder="请输入房屋日单价(元/天)" required>
@@ -206,9 +231,9 @@
 							<!--<option value="">选择房源所在城市</option>-->
 							<foreach name="housecity" item="vo">
 								<if condition="$vo.id == $data['housecity']">
-									<option value="{$vo.id}" selected="selected">{$vo.province}</option>
+									<option value="{$vo.id}" selected="selected">{$vo.cityname}</option>
 									<else/>
-									<option value="{$vo.id}">{$vo.province}</option>
+									<option value="{$vo.id}">{$vo.cityname}</option>
 								</if>
 							</foreach>
 
