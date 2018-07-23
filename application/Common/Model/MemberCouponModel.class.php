@@ -68,5 +68,16 @@ class MemberCouponModel extends CommonModel {
         }
         return $res;
     }
-//select cid,count(*) from as_member_coupon where state=2 GROUP BY cid
+
+    /**
+     * 两表联查
+    */
+    public function getUsercoupon($field='*',$where,$limit=0,$perpage=20){
+        $this->join('RIGHT JOIN __COUPON__ ON __COUPON__.cid = __MEMBER_COUPON__.cid');
+        $this->where($where);
+        $this->limit($limit,$perpage);
+        $this->field($field);
+        $res = $this->select();
+        return $res;
+    }
 }

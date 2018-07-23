@@ -45,4 +45,67 @@ class HouseorderModel extends CommonModel {
         return $res;
     }
 
+    public function getOrderByUid($where,$field='*',$limit=0,$perpage=20){
+        if(isset($where['where']) && !empty($where['where'])){
+            $this->where($where['where']);
+        }
+        $this->limit($limit,$perpage);
+        $this->field($field);
+        $res = $this->select();
+        return $res;
+    }
+
+    /**
+     * 应支付的房屋金额(先折后减)
+     * @params houseid,totalCost,staydays,discount(满天数打折),couponinfo(满金额优惠)
+     * @return array
+    */
+    public function getHouseRent($houseid,$totalCost,$staydays,$discount=array(),$couponInfo = array()){
+
+        //用户优惠券
+//        $where = array();
+//        $where['mid'] = $detail['mid'];
+//        $cid = $this->memberCoupon_model->getCouponGroupByConds(1,'cid','cid',$where);
+//        if(!empty($cid)){
+//            $cwhere['cid'] = array('in',$cid);
+//            $coupon = $this->coupon_model->CouponList('cname,conditions',$cwhere);
+//
+//            foreach ($coupon as $k=>$v){
+//                $conditions = json_decode($coupon[$k]['conditions'],true);
+//                $detail['yh'][$k] = array_merge($conditions,array('cname'=>$coupon[$k]['cname']));
+//                $detail['yhlevel'][$k] = $conditions['reach'];
+//            }
+//            $youhui= arraySort($detail['yh'],'reach');
+//            $detail['yh'] = array_values($youhui);
+//            //租金
+//            $rentdays = floor(intval(($detail['checkout_time'] - $detail['checkin_time']))/86400);
+//            $totalmoney = $rentdays * intval($detail['price']);
+//            //总租金和满减金额最做对比
+//            array_unshift($detail['yhlevel'],intval($totalmoney));
+//            sort($detail['yhlevel']);
+//            $index= array_search($totalmoney,$detail['yhlevel']);//租金所在的位置[下标]
+//            //应付金额
+//            $realmoney = $totalmoney - $detail['yh'][$index-1]['discount'];
+//            $detail['totalmoney'] = $totalmoney;
+//            $detail['index'] = $index;
+//            $detail['realmoney'] = $realmoney;
+
+
+            if(empty($discount)){
+            if(empty($couponInfo)){
+                $house['totalcost'] = $totalCost;
+
+            }
+        }
+    }
+
+    /**
+     * 入住天数原价(包括特殊价格,不包括折扣和优惠券部分)
+     * @params $staydate array,$specialprice array
+     * @return
+    */
+    public function staydaysOldprice($staydate,$specialprice){
+        print_r($staydate);
+    }
+
 }

@@ -13,7 +13,7 @@ class HouseController extends AdminbaseController {
     protected $housetype_model;
     protected $housedetail_model;
     protected $housephoto_model;
-    protected $provinces_model;
+    protected $city_model;
 //    protected $auth_rule_model;
 
     public function _initialize() {
@@ -23,7 +23,7 @@ class HouseController extends AdminbaseController {
         $this->housetype_model = D("Common/Housetype");
         $this->housedetail_model = D("Common/Housedetail");
         $this->housephoto_model = D("Common/Housephoto");
-        $this->provinces_model = D("Common/Provinces");
+        $this->city_model = D("Common/City");
 //        $this->auth_rule_model = D("Common/AuthRule");
     }
 
@@ -71,7 +71,7 @@ class HouseController extends AdminbaseController {
     public function add() {
         $housetag = $this->housesource_model->where(array('state'=> 1))->field('id,typename')->select();
         $housetype = $this->housetype_model->select();
-        $provinces = $this->provinces_model->select();
+        $provinces = $this->city_model->select();
         $this->assign('housetag',$housetag);
         $this->assign('housetype',$housetype);
         $this->assign('provinces',$provinces);
@@ -281,7 +281,7 @@ class HouseController extends AdminbaseController {
         $housecity= $this->HouseCity(array('id'=>$house['housetype']));
         foreach ($housetype as $k => $v){
             $house['housetype'] = $housetype[$k]['housetype'];
-            $house['city'] = $housecity[$k]['province'];
+            $house['city'] = $housecity[$k]['cityname'];
             $house['sourcetype'] = $sourcetype[$k]['typename'];
         }
 
@@ -293,7 +293,7 @@ class HouseController extends AdminbaseController {
 
         $housetag = $this->housesource_model->where(array('state'=> 1))->field('id,typename')->select();
         $type = $this->housetype_model->select();
-        $provinces = $this->provinces_model->select();
+        $provinces = $this->city_model->select();
 
         //房源照片id
         $pids = $this->housephoto_model->where(array('houseid'=>$id))->getField('photoid',true);
@@ -354,6 +354,8 @@ class HouseController extends AdminbaseController {
             $detail['bathroom'] = I('post.bathroom');
             $detail['mindays'] = I('post.mindays');
             $detail['maxmembers'] = I('post.maxmembers');
+            $detail['housearea'] = I('post.housearea');
+            $detail['bedtype'] = I('post.bedtype');
             $detail['starttime'] = strtotime(I('post.starttime'));
             $detail['endtime'] = strtotime(I('post.endtime'));
             $detail['cash'] = I('post.cash');
@@ -369,7 +371,7 @@ class HouseController extends AdminbaseController {
             $detail['discount'] = json_encode($longrent);
             //特殊价格设定
             $sprent = I('post.specialrent');
-            $sptime= I('post.specialtime');
+            $sptime= strtotime(I('post.specialtime'));
             foreach ($sprent as $k=>$v){
                 if(!empty($sprent[$k])){
                     $spprice[] = array('money'=>$sprent[$k],'time'=>$sptime[$k]);
@@ -472,9 +474,9 @@ class HouseController extends AdminbaseController {
 
     public function HouseCity($where=array()){
         if(!empty($where)){
-            $city = $this->provinces_model->where($where)->select();
+            $city = $this->city_model->where($where)->select();
         }else{
-            $city = $this->provinces_model->select();
+            $city = $this->city_model->select();
         }
         return $city;
     }

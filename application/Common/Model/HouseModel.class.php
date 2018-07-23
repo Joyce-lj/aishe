@@ -24,70 +24,19 @@ class HouseModel extends CommonModel {
     );
 
 
-    //验证action是否重复添加
-    public function checkAction($data) {
-        //检查是否重复添加
-        $find = $this->where($data)->find();
-        if ($find) {
-            return false;
-        }
-        return true;
-    }
-    //验证action是否重复添加
-    public function checkActionUpdate($data) {
-    	//检查是否重复添加
-    	$id=$data['id'];
-    	unset($data['id']);
-    	$find = $this->field('id')->where($data)->find();
-    	if (isset($find['id']) && $find['id']!=$id) {
-    		return false;
-    	}
-    	return true;
-    }
-
-
-
-
-
     /**
-     * 更新缓存
-     * @param type $data
-     * @return type
-     */
-    public function menu_cache($data = null) {
-        if (empty($data)) {
-            $data = $this->select();
-            F("Menu", $data);
-        } else {
-            F("Menu", $data);
+     * 房屋详情
+    */
+    public function houseDetail($where=array(),$field='*',$orderby='',$limit=0,$perpage=20){
+        $this->join('LEFT JOIN __HOUSEDETAIL__ ON __HOUSE__.houseid = __HOUSEDETAIL__.houseid');
+        $this->join('LEFT JOIN __HOUSETYPE__ ON __HOUSETYPE__.id = __HOUSE__.typeid');
+        $this->where($where);
+        $this->limit($limit , $perpage);
+        if($orderby){
+            $house = $this->order($orderby)->field($field)->select();
+        }else{
+            $house = $this->field($field)->select();
         }
-        return $data;
+        return $house;
     }
-
-    /**
-     * 后台有更新/编辑则删除缓存
-     * @param type $data
-     */
-    public function _before_write(&$data) {
-        parent::_before_write($data);
-        F("Menu", NULL);
-    }
-
-    //删除操作时删除缓存
-    public function _after_delete($data, $options) {
-        parent::_after_delete($data, $options);
-        $this->_before_write($data);
-    }
-    
-    public function menu($parentid, $with_self = false){
-    	//父节点ID
-    	$parentid = (int) $parentid;
-    	$result = $this->where(array('parentid' => $parentid))->select();
-    	if ($with_self) {
-    		$result2[] = $this->where(array('id' => $parentid))->find();
-    		$result = array_merge($result2, $result);
-    	}
-    	return $result;
-    }
-
 }
