@@ -121,4 +121,15 @@ class AppframeController extends Controller {
         return $this;
     }
 
+    public function ajaxData($data=array(),$type='json'){
+        $res = array();
+        $res['code'] = isset($data['code']) ? $data['code'] : 0;
+        $res['msg'] = isset($data['msg']) ? $data['msg'] : 'success';
+        $res['data'] = isset($data['data']) ? $data['data'] : '';
+        if($type == 'json'){
+            exit(json_encode($res));
+        }else{
+            exit($res);
+        }
+    }
 }

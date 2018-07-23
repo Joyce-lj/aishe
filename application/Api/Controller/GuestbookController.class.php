@@ -32,4 +32,10 @@ class GuestbookController extends AppframeController{
 		}
 		
 	}
+
+	public function test(){
+//        /portal/lists/getCategoryPostLists
+        $this->success("Hello API");
+//	    echo json_encode($data = array('msg'=>'就分手就分手六块腹肌','code'=>9));
+    }
 }
