@@ -1,0 +1,84 @@
+<admintpl file="header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('MemberCoupon/mcList')}">用户优惠券</a></li>
+		</ul>
+		<h3>会员:&nbsp;{$memberphone}</h3>
+		<form class="well form-search" method="post" action="{:U('MemberCoupon/mcList')}">&nbsp;&nbsp;
+			优惠券状态 :&nbsp;
+			<select name="state" id="" style="width: 130px;margin-right: 15px">
+				<option value="">全部</option>
+				<option value="1">未使用</option>
+				<option value="2">已使用</option>
+				<option value="3">已过期</option>
+			</select>
+			优惠券名称：
+			<input type="text" name="keyword" id="keyword" style="width: 200px;" value="{$keyword|default=''}" placeholder="请输入优惠券名称搜索">
+            <if condition="$searchtimes == 1">
+                <input type="hidden" name="memberid" value="{$mid}">
+                <else/>
+                <input type="hidden" name="memberid" value="{$memberid}">
+            </if>
+			<!--<input type="text" name="mid" value="{$memberid}">第二次-->
+			<input type="submit" class="btn btn-primary" value="搜索" />
+		</form>
+
+		<form class="js-ajax-form" action="#" method="post">
+			<!--<div class="table-actions">-->
+				<!--<button class="btn btn-primary btn-small js-ajax-submit" type="submit">{:L('SORT')}</button>-->
+			<!--</div>-->
+			<table class="table table-hover table-bordered table-list" id="menus-table">
+				<thead>
+					<tr>
+						<th width="80">序号</th>
+						<th width="200">优惠券名称</th>
+						<th width="200">到期时间</th>
+						<th width="80">优惠券状态</th>
+					</tr>
+				</thead>
+				<tbody>
+				<foreach name="mclist" item="vo">
+					<tr>
+						<td>{$vo.cmid}</td>
+						<td>{$vo.cname}</td>
+						<td>{$vo.endtime|date="Y-m-d H:i",###}</td>
+						<if condition="$vo.state == 1">
+							<td>未使用</td>
+						</if>
+						<if condition="$vo.state == 2">
+							<td>已使用</td>
+						</if>
+						<if condition="$vo.state == 3">
+							<td>已过期</td>
+						</if>
+					</tr>
+				</foreach>
+				</tbody>
+			</table>
+			<div class="pagination">{$page}</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+	<script>
+		$(document).ready(function() {
+			Wind.css('treeTable');
+			Wind.use('treeTable', function() {
+				$("#menus-table").treeTable({
+					indent : 20
+				});
+			});
+		});
+
+		setInterval(function() {
+			var refersh_time = getCookie('refersh_time_admin_menu_index');
+			if (refersh_time == 1) {
+				reloadPage(window);
+			}
+		}, 1000);
+		setCookie('refersh_time_admin_menu_index', 0);
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,280 @@
+<admintpl file="header" />
+<style>
+
+</style>
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('houseorder/orderdetail')}">订单详情</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form" action="{:U('houseorder/cashBack')}">
+			<!--<h3 style="" class="controls">修改房源标签</h3>-->
+			<input type="hidden" value="{$online}" name="state" id="state">
+			<fieldset>
+				<table class="table table-hover table-bordered table-list" id="menus-table">
+					<tbody>
+						<tr>
+							<th width="100">房源名称</th>
+							<td width="">{$orderdetail.housename}</td>
+						<tr>
+
+						</tr>
+							<th width="100">预订人手机号</th>
+							<td width="">{$orderdetail.orderphone}</td>
+						<tr>
+
+						</tr>
+							<th width="100">订单状态</th>
+							<td width="">
+								<switch name="orderdetail.orderstate">
+									<case value="1">已支付,未确认</case>
+									<case value="2">已支付,已确认</case>
+									<case value="3">已入住</case>
+									<case value="4">已退房,未退押金</case>
+									<case value="5">已退房,已退押金</case>
+									<case value="6">已失效</case>
+									<case value="7">已退款</case>
+									<default />未知类型
+								</switch>
+
+							</td>
+						<tr>
+
+						</tr>
+							<th width="100">押金（元）</th>
+							<td width="">{$orderdetail.cash}</td>
+						<tr>
+						</tr>
+							<th width="100">入住时间</th>
+							<td width="">{$orderdetail.checkin_time|date="Y-m-d H:i",###}</td>
+						<tr>
+						</tr>
+							<th width="100">退房时间</th>
+							<td width="">{$orderdetail.checkout_time|date="Y-m-d H:i",###}</td>
+						<tr>
+						</tr>
+							<th width="100">入住天数</th>
+						<php>$diff = intval(intval($orderdetail['checkout_time'])-intval($orderdetail['checkin_time'])) </php>
+						<php>$days = floor($diff/86400) </php>
+							<td width="">{$days}</td>
+						<tr>
+						</tr>
+							<th width="100">享受折扣</th>
+							<td width="">
+								<if condition="$orderdetail.isdiscount == 1">
+								<php>$item =  $orderdetail['discount2'];</php>
+										<if condition="$days gt $item[2]['days']">
+											享受{$item[2].discount}折
+											<elseif condition="$days gt $item[1]['days']"/>
+											享受{$item[1].discount}折
+											<elseif condition="$days gt $item[0]['days']"/>
+											享受{$item[0].discount}折
+											<else/>
+											无折扣
+										</if>
+								<else/>
+									无折扣
+								</if>
+							</td>
+						<tr>
+						</tr>
+							<th width="100">优惠券(元)</th>
+						<!--房屋总价=日租价*入住天数,房屋总价和优惠满减金额做对比-->
+							<td>{$orderdetail['yh'][$index-1]['cname']}</td>
+						<tr>
+						</tr>
+							<th width="100">应付金额(元)</th>
+							<td width="">{$realmoney}</td>
+						<tr>
+					</tbody>
+				</table>
+				<switch name="orderdetail.orderstate">
+					<case value="1">
+						<if condition="$template == 'confirmOrder'">
+							<p style="margin-top: 10px">入住人身份证号码:</p>
+							<p><input type="text" name="memberID[]" class="memberID" required><span class="form-required" style="color: red;margin-left: 5px">*</span></p>
+							<for start="1" end="$orderdetail.maxmembers">
+								<p><input type="text" name="memberID[]"></p>
+							</for>
+						</if>
+						<if condition="$template == 'refund'">
+							<p style="margin-top: 10px">退款金额:</p>
+							<p><input type="text" name="refund" class="refund" placeholder="请输入退款金额" required>(元)<span class="form-required" style="color: red;margin-left: 5px">*</span></p>
+						</if>
+					</case>
+					<case value="2">
+						<p style="margin-top: 10px">入住人身份证号码:</p>
+						<p><input type="text" name="memberID[]" class="memberID" required><span class="form-required" style="color: red;margin-left: 5px">*</span></p>
+						<for start="1" end="$orderdetail.maxmembers">
+							<p><input type="text" name="memberID[]"></p>
+						</for>
+					</case>
+					<case value="3">
+						<p style="margin-top: 10px">入住人身份证号码:</p>
+						<p><input type="text" name="memberID[]"class="memberID"required><span class="form-required" style="color: red;margin-left: 5px">*</span></p>
+						<for start="1" end="$orderdetail.maxmembers">
+							<p><input type="text" name="memberID[]"></p>
+						</for>
+					</case>
+					<case value="4">
+						<p style="margin-top: 10px">入住人身份证号码:</p>
+						<p><input type="text" required name="memberID[]" class="memberID"><span class="form-required" style="color: red;margin-left: 5px">*</span></p>
+						<for start="1" end="$orderdetail.maxmembers">
+							<p><input type="text" name="memberID[]"></p>
+						</for>
+					</case>
+
+					<case value="5">
+						<p style="margin-top: 10px">入住人身份证号码:</p>
+						<p><input type="text" required name="memberID[]" class="memberID"><span class="form-required" style="color: red;margin-left: 5px">*</span></p>
+						<for start="1" end="$orderdetail.maxmembers">
+							<p><input type="text" name="memberID[]"></p>
+						</for>
+					</case>
+
+					<case value="6">
+					</case>
+					<case value="7">
+						<p style="margin-top: 10px">入住人身份证号码:</p>
+						<p><input type="text" required name="memberID[]" class="memberID"><span class="form-required" style="color: red;margin-left: 5px">*</span></p>
+						<for start="1" end="$orderdetail.maxmembers">
+							<p><input type="text" name="memberID[]"></p>
+						</for>
+					</case>
+					<default />未知类型
+				</switch>
+				<input type="hidden" name="orderid" value="{$orderdetail.orderid}" id="orderid">
+			</fieldset>
+			<div class="form-actions">
+
+				<switch name="orderdetail.orderstate">
+					<case value="1">
+						<if condition="$template == 'confirmOrder' || $template == 'orderDetail'">
+							<a href="{:U('houseorder/confirmOrder',array('orderid'=>$orderdetail['orderid']))}"onclick="return checkCard('{$template}')">
+							<button type="button" class="btn btn-primary js-ajax-submit">确认订单
+							</button>
+							</a>
+						</if>
+						<if condition="$template == 'refund' || $template == 'orderDetail'">
+							<a href="{:U('houseorder/refund',array('orderid'=>$orderdetail['orderid']))}" onclick="return checkRefund('{$template}')">
+							<button type="button" class="btn btn-primary js-ajax-submit">退款</button>
+							</a>
+						</if>
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+					</case>
+					<case value="2">
+						<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">退款</button>
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+					</case>
+					<case value="3">
+						<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">退还押金</button>
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+					</case>
+					<case value="4">
+						<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkPost()">退还押金</button>
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+					</case>
+					<case value="5">
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+					</case>
+					<case value="6">
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+					</case>
+					<case value="7">
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+					</case>
+					<default />
+						<a class="btn" href="javascript:history.back(-1);">{:L('BACK')}</a>
+				</switch>
+
+			</div>
+		</form>
+	</div>
+	<script src="__PUBLIC__/js/common.js"></script>
+
+	<script>
+		$(function() {
+		    var state = $("#state").val();
+		    if(state == 1){
+                $("input[type='text']").attr("readonly","readonly");
+                $("textarea").attr("readonly","readonly");
+                $("select").attr("readonly","readonly");
+			}else{
+                $("input[type='text']").removeAttr("readonly");
+                $("textarea").removeAttr("readonly");
+                $("select").removeAttr("readonly");
+			}
+
+			$(".js-ajax-close-btn").on('click', function(e) {
+				e.preventDefault();
+				Wind.use("artDialog", function() {
+					art.dialog({
+						id : "question",
+						icon : "question",
+						fixed : true,
+						lock : true,
+						background : "#CCCCCC",
+						opacity : 0,
+						content : "您确定需要关闭当前页面嘛？",
+						ok : function() {
+							setCookie('refersh_time_admin_menu_index', 1);
+							window.close();
+							return true;
+						}
+					});
+				});
+			});
+		});
+	</script>
+	<script>
+		function checkPost(){
+		    var card = $(".memberID").val();
+		    if(card == '' || card == null){
+		        alert('标注*号的为必填项');
+		        return false;
+			}else{
+                if(!isCardNo(card)){
+                    alert('身份证号码输入有误,请核对!');
+                    return false;
+				}else{
+                    return true;
+				}
+			}
+		}
+
+        //验证身份证号
+        function isCardNo(card) {
+            var pattern = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+            return pattern.test(card);
+        }
+
+        function checkCard(tpl){
+		    if(tpl == 'confirmOrder'){
+		        checkPost();
+			}
+		}
+		function checkRefund(tpl) {
+			var ref = $(".refund").val();
+			if(tpl == 'refund'){
+                if(ref == '' || ref == null){
+                    alert('请输入退款金额!');
+                    return false;
+                }
+                if(ref.length > 0){
+                    var ts = /^\d+$/;
+                    if((ts.test(ref))){
+                        return true;
+                    }else{
+                        alert('请输入整数!');
+                        $(".refund").val('');
+                        return false;
+                    }
+                }
+			}
+        }
+
+	</script>
+
+</body>
+</html>
