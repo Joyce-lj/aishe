@@ -176,10 +176,14 @@
 								<option value="">请选择床的类型</option>
 								<option value="大床" selected="selected">{$data['bedtype']}</option>
 								<option value="双床">双床</option>
-								<else/>
+								<elseif condition="$data['bedtype'] == '双床'"/>
 								<option value="">请选择床的类型</option>
 								<option value="大床">大床</option>
 								<option value="$data['bedtype']">{$data['bedtype']}</option>
+								<else/>
+								<option value="">请选择床的类型</option>
+								<option value="大床">大床</option>
+								<option value="双床">双床</option>
 							</if>
 
 						</select>
@@ -215,7 +219,7 @@
 						<p class="sp">
 							<foreach name="data.specialprice2" item="vo">
 								<input type="text" name="specialrent[]" id=''class='specialrent'  value="{$vo.money}" placeholder="" style="text-align: center" >(元/天)
-								<input type="text" name="specialtime[]" class='specialtime js-datetime'  value="{$vo.time}" style="width: 120px;" >
+								<input type="text" name="specialtime[]" class='specialtime js-datetime'  value="{$vo.time|date='Y-m-d H:i',###}" style="width: 120px;" >
 								<input type="button" value="添加" onclick="addspecial()">
 								<!--<input type="button" value="删除" onclick="delspecial(this)">-->
 							</foreach>
@@ -313,10 +317,11 @@
 
 					</div>
 				</div>
+				<input type="hidden" name="id" value="{$houseid}" />
 				<input type="hidden" name="online" value="0" id="online">
 			</fieldset>
 			<div class="form-actions">
-				<input type="hidden" name="id" value="{$data.houseid}" />
+
 				<if condition="$online != 1">
 					<button type="submit" class="btn btn-primary js-ajax-submit" onclick="return checkPost()">{:L('SAVE')}</button>
 					<button type="submit" class="btn btn-primary js-ajax-submit" onclick=" return checkOnline()">保存并上线</button>
