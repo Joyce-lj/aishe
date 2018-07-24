@@ -30,6 +30,8 @@ class HouseController extends AdminbaseController {
     // 后台房源列表
     public function index() {
         $keyword = I('request.keyword');
+        $field = 'as_house.houseid,as_house.housename,as_house.typeid,as_housedetail.price,as_house.houseposition,as_house.housecity,as_house.online,as_house.isorder
+        ,as_housedetail.discount,as_housedetail.specialprice,as_housedetail.isdiscount,as_housedetail.isspecial';
         if($keyword){
             $where['housename']  = array('like','%'.$keyword.'%');
         }
@@ -48,7 +50,7 @@ class HouseController extends AdminbaseController {
         $this->house_model->join('LEFT JOIN __HOUSEDETAIL__ ON __HOUSEDETAIL__.houseid = __HOUSE__.houseid');
         $this->house_model->where($where);
         $this->house_model->limit($page->firstRow , $page->listRows);
-        $house = $this->house_model->order('as_house.houseid desc')->field('*')->select();
+        $house = $this->house_model->order('as_house.houseid desc')->field($field)->select();
         $housetype = $this->housetype_model->select();
         foreach($housetype as $v){
             $type[$v['id']] = $v['housetype'];
@@ -371,10 +373,10 @@ class HouseController extends AdminbaseController {
             $detail['discount'] = json_encode($longrent);
             //特殊价格设定
             $sprent = I('post.specialrent');
-            $sptime= strtotime(I('post.specialtime'));
+            $sptime= I('post.specialtime');
             foreach ($sprent as $k=>$v){
                 if(!empty($sprent[$k])){
-                    $spprice[] = array('money'=>$sprent[$k],'time'=>$sptime[$k]);
+                    $spprice[] = array('money'=>$sprent[$k],'time'=> strtotime($sptime[$k]));
                 }
             }
             $detail['specialprice'] = json_encode($spprice);
@@ -382,6 +384,7 @@ class HouseController extends AdminbaseController {
             $detail['createtime'] = time();
             $detail['isdiscount'] = !empty($longrent) ? 1 : 0;
             $detail['isspecial'] = !empty($spprice) ? 1 : 0;
+
             if($action == 'add'){
                 $housedetailid = $this->housedetail_model->add($detail);
             }else{
