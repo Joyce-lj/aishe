@@ -305,8 +305,8 @@ class HouseController extends AdminbaseController {
         $this->assign('housecity',$provinces);
         $this->assign('aids',$aids);
 
-
         $this->assign("data", $house);
+        $this->assign("houseid", $id);
         $this->assign("online", $online);
         $this->assign("photos", $photos);
         $this->display();
@@ -350,6 +350,7 @@ class HouseController extends AdminbaseController {
             $this->error($this->house_model->getError());
         }
 
+
         //house_detail数据
         if ($this->housedetail_model->create()!==false && ($houseid || $uphouseid)) {
             $detail['houseid'] = $houseid ? $houseid : $id;
@@ -390,7 +391,14 @@ class HouseController extends AdminbaseController {
             }else{
                 if($id){
                     $where['houseid'] = $id ;
-                    $uphousedetailid = $this->housedetail_model->where($where)->save($detail);
+                    $count = $this->housedetail_model->where(array('houseid'=>$id))->count();
+                    if($count){
+                        $uphousedetailid = $this->housedetail_model->where($where)->save($detail);
+                    }else{
+                        $uphousedetailid = $this->housedetail_model->where($where)->add($detail);
+                    }
+
+//                    echo $this->housedetail_model->getLastSql();die;
                 }
             }
         } else {

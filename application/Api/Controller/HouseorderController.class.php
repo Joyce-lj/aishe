@@ -36,26 +36,31 @@ class HouseorderController extends AppframeController{
         $ordertime = time();
         $houseid = I('request.houseid');
         $uid = I('request.uid');
-        $checkin_time = I('post.checkin_time');
-        $checkout_time = I('post.checkout_time');
-        $checkin_members = I('post.checkin_members');
-        $staydays = I('post.staydays');
-        $startweek = I('post.startweek');
-        $endweek = I('post.endweek');
-        $discount_cost = I('post.cost');
+        $cid = I('request.cid');
+        $checkin_time = strtotime(I('request.checkin_time'));
+        $checkout_time = strtotime(I('request.checkout_time'));
+        $checkin_members = I('request.checkin_members');
+        $staydays = I('request.staydays');
+        $startweek = I('request.startweek');
+        $endweek = I('request.endweek');
+        $discount_cost = I('request.cost');
 
         $isOrder = 1;
         $insdata['mid'] = $uid;
         $insdata['houseid'] = $houseid;
-        $insdata['ordernum'] = '';//唯一标识的订单号
-        $insdata['housename'] = !empty($housename) ? $housename : '随风奔跑';
+       $housename =  $this->getHousenameById($houseid);
+
+        $lastorder = $this->houseorder_model->limit(1)->order('createtime DESC')->field('orderid')->find();
+
+        $insdata['ordernum'] = $this->getOrderNum($lastorder['orderid']);//唯一标识的订单号
+        $insdata['housename'] = !empty($housename['housename']) ? $housename['housename'] : '房屋名称未知';
         $insdata['checkin_time'] = $checkin_time;
         $insdata['checkout_time'] = $checkout_time;
         $insdata['checkin_members'] = $checkin_members;
         $insdata['createtime'] = $ordertime;
         $insdata['staydays'] = $staydays;
-        $insdata['orderstate'] = 2;
-        $insdata['sum_cost'] = 0;
+        $insdata['orderstate'] = 2;   //已支付未确认
+        $insdata['sum_cost'] = $discount_cost;
         $insdata['discount_cost'] = $discount_cost;
         $insdata['stayinfo'] = json_encode(array('startweek'=>$startweek,'endweek'=>$endweek));
 
@@ -89,7 +94,7 @@ class HouseorderController extends AppframeController{
             if($state['isorder'] == 1){
                 $data['code'] = -3;
                 $data['msg'] = '该房屋已被预定,请选择其他房屋!';
-                $this->ajaxData($data);
+//                $this->ajaxData($data);
             }
         }
         if(!empty($where)){
@@ -107,18 +112,24 @@ class HouseorderController extends AppframeController{
             //1.入订单库
             $insId = $this->houseorder_model->add($insdata);
             $upId = $this->house_model->where($where)->save($updata);
+            //修改用户优惠券状态Wie已过期
+            $upstate['state'] = 2;
+            $cstate = $this->memberCoupon_model->where(array('cid'=>$cid,'mid'=>$uid))->save($upstate);
             //2.调用支付接口
-            $paystate = 0;
+            $paystate = 1;
             if($paystate){//成功
                 $this->house_model->commit();
                 $this->houseorder_model->commit();
+                $this->memberCoupon_model->commit();
             }else{
                 $this->house_model->rollback();
                 $this->houseorder_model->rollback();
+                $this->memberCoupon_model->rollback();
             }
         }
 
-        if($paystate && $insId && $upId){
+//        if($paystate && $insId && $upId){
+        if($paystate){
             $this->ajaxData();
         }else{
             $data['code'] = -1;
@@ -216,5 +227,27 @@ class HouseorderController extends AppframeController{
 //        //特殊价格
 
 //        print_r($coupon);
+    }
+
+    public function getHousenameById($houseid=0){
+	    $name = $this->house_model->where(array('houseid'=>$houseid))->field('housename')->find();
+	    return $name;
+    }
+
+    public function getOrderNum($orderid=0){
+	    if($orderid){
+	        $num = $this->houseorder_model->where(array('orderid'=>$orderid))->field('ordernum')->find();
+	        if(!empty($num['ordernum'])){
+                $st = substr($num['ordernum'], -1);
+                $or = intval($st +1);
+                $orderNum = date('Ymd').'00000'.$or;
+            }else{
+                $orderNum = date('Ymd').'000001';
+            }
+	        return $orderNum;
+        }else{
+	        $orderNum = date('Ymd').'000001';
+	        return $orderNum;
+        }
     }
 }
