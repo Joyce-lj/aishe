@@ -1,5 +1,7 @@
 <admintpl file="header" />
 <link rel="stylesheet" href="__ROOT__/easyupload/easy-upload.css">
+<!--<link rel="stylesheet" href="__ROOT__/bootstrap-v3/css/bootstrap.css">-->
+<!--<link rel="stylesheet" href="__ROOT__/bootstrap-v3/css/bootstrap.min.css">-->
 <style>
 	.easy_upload_delbtn{
 		display: none;
@@ -117,6 +119,12 @@
 							</tr>
 							<tr>
                                 <td>
+									<!--<div class='input-group date' id='datetimepicker3'>-->
+										<!--<input type='text' class="form-control" />-->
+										<!--<span class="input-group-addon"><span class="glyphicon glyphicon-time"></span>-->
+                    					<!--</span>-->
+									<!--</div>-->
+
                                     <input type="text" name="starttime" id='starttime' class="js-datetime" value="{$formget.starttime|default=''}" style="width: 205px;" autocomplete="off">
 									<i style="width: 36px;position: absolute;cursor: pointer" class="js-datetime"><img src="__TMPL__Public/assets/images/cal.png" alt="" style="margin-left:-36px;margin-top: -2px"></i>
 								</td>
@@ -180,7 +188,7 @@
                         <p><input type="checkbox" id="tj">&nbsp;&nbsp;&nbsp;&nbsp;特殊价格设定</p>
                         <p class="sp">
                             <input type="text" name="specialrent[]" class="specialrent" value="" placeholder="" disabled>(元/天)
-                            <input type="text" name="specialtime[]" class="js-datetime specialtime" value="{$formget.time|default=''}" style="width: 120px;" autocomplete="off" disabled>
+                            <input type="text" name="specialtime[]" class="js-datetime specialtime" value="{$formget.specialtime|default=''}" style="width: 120px;" autocomplete="off" disabled>
 							<input type="button" value="添加" onclick="addspecial()">
                         </p>
                     </div>
@@ -252,6 +260,8 @@
 		</form>
 	</div>
 	<script src="__PUBLIC__/js/common.js"></script>
+	<!--<script src="__ROOT__/bootstrap-v3/js/bootstrap.js"></script>-->
+	<!--<script src="__ROOT__/bootstrap-v3/js/bootstrap.min.js"></script>-->
 	<script src="__ROOT__/easyupload/vendor/jquery.cookie-1.4.1.min.js"></script>
 	<script src="__ROOT__/easyupload/easyUpload.js"></script>
 </body>
@@ -494,4 +504,9 @@
         $("#endtime").attr("autofocus",'autofocus');
 
     }
+</script>
+<script type="text/javascript">
+    // $('#datetimepicker3').datetimepicker({
+    //     format: 'LT'
+    // });
 </script>
