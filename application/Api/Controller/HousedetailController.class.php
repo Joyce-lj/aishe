@@ -97,6 +97,7 @@ class HousedetailController extends AppframeController{
         $where['houseid'] = $houseid;
         $field = 'houseid,price,isdiscount,discount,starttime,endtime,specialprice';
         $data = $this->housedetail_model->where($where)->field($field)->select();
+        $usingDate = $this->getOrderedHouseTime($houseid);
         foreach ($data as $k=>$v){
             $days = (intval($data[$k]['endtime'])- intval($data[$k]['starttime']))/86400 + 1;
             $data[$k]['starttime'] = date('Y-m-d',$data[$k]['starttime']);
@@ -108,6 +109,7 @@ class HousedetailController extends AppframeController{
                 $spdate = date('Y-m-d',$data[$k]['specialprice'][$sp]['time']);
                 $spsplit = explode('-',$spdate);
                 $specialprice[$spdate] = array(
+                    'using'=> in_array($spdate,$usingDate) ? 1 : 0,
                     'special'=>1,
                     'date'=> $spdate,
                     'year'=> $spsplit[0],
@@ -137,15 +139,10 @@ class HousedetailController extends AppframeController{
             $ordertime = array_merge($ordertime,$specialprice);
 
             //对已预约到日期做标注
-            $usingTime = $this->getOrderedHouseTime($houseid);
-            foreach ($usingTime as $use => $v){
-                $checkin = $usingTime[$use]['checkin_time'];
-                $checkout = $usingTime[$use]['checkout_time'];
-                $usingDate = $this->dateList($checkin,$checkout);
-            }
+            $usingDate = $this->getOrderedHouseTime($houseid);
+
             $usingCount = count($usingDate);
-            unset($usingDate[$usingCount-1]);
-            for($i=0;$i<count($usingDate);$i++){
+            for($i=0; $i < $usingCount; $i++){
                 $dsplit = explode('-',$usingDate[$i]);
                 $ordertime2[$usingDate[$i]] = array(
                     'using'=>1,
@@ -170,11 +167,30 @@ class HousedetailController extends AppframeController{
 
 
     public function getOrderedHouseTime($houseid){
-        $field='houseid,min(checkin_time) as checkin_time ,max(checkout_time) as checkout_time';
+        $field='houseid,checkin_time,checkout_time';
 //        max(score)
         $where['houseid'] = $houseid;
         $orderTime = $this->houseorder_model->where($where)->field($field)->select();
-        return $orderTime;
+        foreach ($orderTime as $k=>$v){
+            $a[] = $this->dateList($orderTime[$k]['checkin_time'],$orderTime[$k]['checkout_time']);
+        }
+        $n = count($a);
+        $b = array();
+        for ($i = 0;$i<$n;$i++){
+            $num = count($a[$i]);
+            unset($a[$i][$num-1]);
+            $a[$i]['houseid'] = $houseid;
+        }
+
+        for ($i = 0;$i<1;$i++){
+            for($j=$n-1;$j>=0;$j--){
+                if($a[$j]['houseid'] == $a[$i]['houseid'] ){
+                    $b = array_merge($b,$a[$j]);
+                }
+            }
+            unset($b['houseid']);
+        }
+        return $b;
     }
 
     /**

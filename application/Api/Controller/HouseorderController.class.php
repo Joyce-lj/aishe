@@ -41,14 +41,25 @@ class HouseorderController extends AppframeController{
         $checkout_time = strtotime(I('request.checkout_time'));
         $checkin_members = I('request.checkin_members');
         $staydays = I('request.staydays');
+        $discount_cost = I('request.cost');
+        //存储于stayInfos
         $startweek = I('request.startweek');
         $endweek = I('request.endweek');
-        $discount_cost = I('request.cost');
+        $discount = I('request.discount');
 
+        //房屋名称
         $isOrder = 1;
         $insdata['mid'] = $uid;
         $insdata['houseid'] = $houseid;
-       $housename =  $this->getHousenameById($houseid);
+        $housename =  $this->getHousenameById($houseid);
+        //所使用的优惠券
+        $cup = $this->coupon_model->CouponList('conditions',array('cid'=>$cid));
+        if(!empty($cup)){
+            $cond = json_decode($cup[0]['conditions'],true);
+            $coupon = $cond['discount'];
+        }else{
+            $coupon = 0;
+        }
 
         $lastorder = $this->houseorder_model->limit(1)->order('createtime DESC')->field('orderid')->find();
 
@@ -62,7 +73,12 @@ class HouseorderController extends AppframeController{
         $insdata['orderstate'] = 2;   //已支付未确认
         $insdata['sum_cost'] = $discount_cost;
         $insdata['discount_cost'] = $discount_cost;
-        $insdata['stayinfo'] = json_encode(array('startweek'=>$startweek,'endweek'=>$endweek));
+        $insdata['stayinfo'] = json_encode(array(
+                'startweek'=>$startweek,
+                'endweek'=>$endweek,
+                'discount'=>$discount,
+                'coupon'=>$coupon,
+        ));
 
         $userinfo = $this->member_model->getUserByUid('memberphone',array('mid'=>$uid));
         $insdata['orderphone'] = $userinfo[0]['memberphone'];
@@ -107,62 +123,70 @@ class HouseorderController extends AppframeController{
 //            $this->housephoto_model->commit();
 //            $this->housephoto_model->rollback();
 
-
             $this->housephoto_model->startTrans();
             //1.入订单库
             $insId = $this->houseorder_model->add($insdata);
-            $upId = $this->house_model->where($where)->save($updata);
             //修改用户优惠券状态Wie已过期
             $upstate['state'] = 2;
             $cstate = $this->memberCoupon_model->where(array('cid'=>$cid,'mid'=>$uid))->save($upstate);
             //2.调用支付接口
             $paystate = 1;
             if($paystate){//成功
-                $this->house_model->commit();
                 $this->houseorder_model->commit();
                 $this->memberCoupon_model->commit();
+
+                $this->ajaxData();
             }else{
-                $this->house_model->rollback();
                 $this->houseorder_model->rollback();
                 $this->memberCoupon_model->rollback();
+
+                $data['code'] = -1;
+                $data['msg'] = 'fail';
+                $this->ajaxData($data);
             }
         }
 
 //        if($paystate && $insId && $upId){
-        if($paystate){
-            $this->ajaxData();
-        }else{
-            $data['code'] = -1;
-            $data['msg'] = 'fail';
-            $this->ajaxData($data);
-        }
+//        if($paystate){
+//            $this->ajaxData();
+//        }else{
+//            $data['code'] = -1;
+//            $data['msg'] = 'fail';
+//            $this->ajaxData($data);
+//        }
     }
 
     //我的订单列表
     public function orderList(){
-        //1未支付,2已支付未确认,3已支付已确认,4已入住,5已退房,6已失效,7已退款
+        //1未支付,2已支付未确认,3已支付已确认,4已入住,5已退房,6已失效,7已退款8未入住
         $uid = I('get.uid',0,'intval');
         $state = I('get.orderstate',0,'intval');
         $page = I('get.page',1,'intval');
         $perpage = I('get.perpage',20,'intval');
         $limit = ($page - 1) * $perpage;
-        if(!empty($state)){
+        if($state == 4){//已入住
             $where['where'] = array(
                 'mid'=> $uid,
                 'orderstate'=> $state
             );
         }
-        else{
+        if($state == 8){//未入住
             $where['where'] = array(
                 'mid'=> $uid,
                 'orderstate'=> array('exp', 'IN (2,3)'),
             );
         }
+        if(empty($state)){
+            $where['where'] = array(
+                'mid'=> $uid,
+                //'orderstate'=> $state
+            );
+        }
         $order = $this->houseorder_model->getOrderByUid($where,'*',$limit,$perpage);
 
         foreach ($order as $or => $v){
-            $order[$or]['checkin_time'] = date('Y-m-d',$order[$or]['checkin_time']);
-            $order[$or]['checkout_time'] = date('Y-m-d',$order[$or]['checkout_time']);
+            $order[$or]['checkin_time'] = date('n',$order[$or]['checkin_time']).'月'.date('j',$order[$or]['checkin_time']).'日';
+            $order[$or]['checkout_time'] = date('n',$order[$or]['checkout_time']).'月'.date('j',$order[$or]['checkout_time']).'日';
             $order[$or]['stayinfo'] = json_decode($order[$or]['stayinfo'],true);
         }
         $data['code'] = 0;
@@ -182,8 +206,8 @@ class HouseorderController extends AppframeController{
         $this->houseorder_model->field($field);
         $order = $this->houseorder_model->select();
         foreach ($order as $or=>$v){
-            $order[$or]['checkin_time'] = date('H:i',$order[$or]['checkin_time']);
-            $order[$or]['checkout_time'] = date('H:i',$order[$or]['checkout_time']);
+            $order[$or]['checkin_time'] = date('n',$order[$or]['checkin_time']).'月'.date('j',$order[$or]['checkin_time']).'日';
+            $order[$or]['checkout_time'] = date('n',$order[$or]['checkout_time']).'月'.date('j',$order[$or]['checkout_time']).'日';
             $order[$or]['stayinfo'] = json_decode($order[$or]['stayinfo'],true);
         }
 
