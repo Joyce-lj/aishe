@@ -447,7 +447,6 @@
         Wind.use('datePicker', function () {
             dateTimeInput.datePicker({
                 time: true,
-                // format: 'yyyy',
                 showOn: "button",
                 buttonImage: "images/calendar.gif",
                 buttonImageOnly: true
