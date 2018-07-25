@@ -7,7 +7,7 @@
 			<!--<li><a href="{:U('housesource/add')}">新增标签</a></li>-->
 			<!--<li><a href="{:U('slideshow/lists')}">{:L('ADMIN_MENU_LISTS')}</a></li>-->
 		</ul>
-		<h3>房源名称:{$orderlist[0]['housename']}</h3>
+		<h3>房源名称&nbsp;:&nbsp;&nbsp;{$housename}</h3>
 		<!--<form class="well form-search" method="post" action="{:U('house/index')}">&nbsp;&nbsp;-->
 			<!--关键字：-->
 			<!--<input type="text" name="keyword" id="keyword" style="width: 200px;" value="{$keyword|default=''}" placeholder="请输入房源名称搜索">-->
@@ -21,16 +21,18 @@
 			<table class="table table-hover table-bordered table-list" id="menus-table">
 				<thead>
 					<tr>
-						<th width="200">房源名称</th>
+						<!--<th width="80">序号</th>-->
 						<th width="80">预定时间</th>
+						<th width="80">预定人(手机号)</th>
 						<th width="80">预定状态</th>
 					</tr>
 				</thead>
 				<tbody>
-				<foreach name="orderlist" item="vo">
+				<foreach name="orderlist" item="vo" key="k">
 					<tr>
-						<td>{$vo.housename}</td>
-						<td>{$vo.createtime|date="Y-m-d H:i",###}</td>
+						<!--<td>{$k+1}</td>-->
+						<td>{$vo.date}</td>
+						<td>{$vo.memberphone}</td>
 						<td>
 							<if condition="$vo.isorder == 1">
 								已预订
