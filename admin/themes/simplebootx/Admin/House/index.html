@@ -63,7 +63,6 @@
 						<th width="200">价格(元/天)</th>
 						<th width="80">长租折扣</th>
 						<th width="80">房源状态</th>
-						<th width="80">预定状态</th>
 						<th width="180">{:L('ACTIONS')}</th>
 					</tr>
 				</thead>
@@ -86,13 +85,6 @@
 								上线
 								<else/>
 								下线
-							</if>
-						</td>
-						<td>
-							<if condition="$vo.isorder == 1">
-								已预订
-								<else/>
-								未预定
 							</if>
 						</td>
 						<td>

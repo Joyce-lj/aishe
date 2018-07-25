@@ -1,5 +1,6 @@
 <admintpl file="header" />
 <link rel="stylesheet" href="__ROOT__/easyupload/easy-upload.css">
+<!--<link rel="stylesheet" href="__PUBLIC__/js/datetimepicker/jquery.datetimepicker.css">-->
 <!--<link rel="stylesheet" href="__ROOT__/bootstrap-v3/css/bootstrap.css">-->
 <!--<link rel="stylesheet" href="__ROOT__/bootstrap-v3/css/bootstrap.min.css">-->
 <style>
@@ -125,12 +126,14 @@
                     					<!--</span>-->
 									<!--</div>-->
 
-                                    <input type="text" name="starttime" id='starttime' class="js-datetime" value="{$formget.starttime|default=''}" style="width: 205px;" autocomplete="off">
-									<i style="width: 36px;position: absolute;cursor: pointer" class="js-datetime"><img src="__TMPL__Public/assets/images/cal.png" alt="" style="margin-left:-36px;margin-top: -2px"></i>
+                                    <input type="text" name="starttime" id='starttime' class="js-a" value="{$formget.starttime|default=''}" style="width: 205px;" autocomplete="off">
+									<!--<i style="width: 36px;position: absolute;cursor: pointer" class="">-->
+										<!--<img src="__TMPL__Public/assets/images/cal.png" alt="" id="starttime-img" style="margin-left:-36px;margin-top: -2px">-->
+									<!--</i>-->
 								</td>
 								<td>
-                                    <input type="text"  name="endtime" id="endtime" class="js-datetime" value="{$formget.endtime|default=''}" style="width: 205px;" autocomplete="off">
-									<i style="width: 36px;position: absolute;cursor: pointer"><img onclick="cal()" src="__TMPL__Public/assets/images/cal.png" alt=""  style="margin-left:-36px;margin-top: -2px"></i>
+                                    <input type="text"  name="endtime" id="endtime" class="js-datetime1" value="{$formget.endtime|default=''}" style="width: 205px;" autocomplete="off">
+									<!--<i style="width: 36px;position: absolute;cursor: pointer"><img onclick="cal()"id="endtime-img"  src="__TMPL__Public/assets/images/cal.png" alt=""  style="margin-left:-36px;margin-top: -2px"></i>-->
                                 </td>
 								<td>
                                     <input type="text" value="" name="cash" id="cash" style="width: 205px;">
@@ -188,7 +191,7 @@
                         <p><input type="checkbox" id="tj">&nbsp;&nbsp;&nbsp;&nbsp;特殊价格设定</p>
                         <p class="sp">
                             <input type="text" name="specialrent[]" class="specialrent" value="" placeholder="" disabled>(元/天)
-                            <input type="text" name="specialtime[]" class="js-datetime specialtime" value="{$formget.specialtime|default=''}" style="width: 120px;" autocomplete="off" >
+                            <input type="text" name="specialtime[]" class="js-datetime specialtime" value="{$formget.specialtime|default=''}"  disabled="disabled" style="width: 120px;" autocomplete="off">
 							<input type="button" value="添加" onclick="addspecial()">
                         </p>
                     </div>
@@ -260,6 +263,7 @@
 		</form>
 	</div>
 	<script src="__PUBLIC__/js/common.js"></script>
+	<!--<script src="__PUBLIC__/js/datetimepicker/jquery.datetimepicker.full.js"></script>-->
 	<!--<script src="__ROOT__/bootstrap-v3/js/bootstrap.js"></script>-->
 	<!--<script src="__ROOT__/bootstrap-v3/js/bootstrap.min.js"></script>-->
 	<script src="__ROOT__/easyupload/vendor/jquery.cookie-1.4.1.min.js"></script>
@@ -392,12 +396,22 @@
     }
 
     function addspecial() {
-        var ele="<p class=\"sp\">" +
+        var ischecked = $("#tj").is(':checked');
+        var ele1="<p class=\"sp\">" +
             " <input type=\"text\" name=\"specialrent[]\" class='specialrent' value=\"\" placeholder=\"\" disabled>(元/天)\n" +
             "<input type=\"text\" name=\"specialtime[]\" class=\"js-datetime specialtime\" value=\"{$formget.time|default=''}\" style=\"width: 120px;\" autocomplete=\"off\" disabled>\n" +
             "<input onclick=\"delspecial(this)\" type='button' value='删除'/>" +
             "</p>";
-        $(".sp").parent().append(ele);
+        var ele2="<p class=\"sp\">" +
+            " <input type=\"text\" name=\"specialrent[]\" class='specialrent' value=\"\" placeholder=\"\" >(元/天)\n" +
+            "<input type=\"text\" name=\"specialtime[]\" class=\"js-datetime specialtime\" value=\"{$formget.time|default=''}\" style=\"width: 120px;\" autocomplete=\"off\" >\n" +
+            "<input onclick=\"delspecial(this)\" type='button' value='删除'/>" +
+            "</p>";
+        if(ischecked){
+            $(".sp").parent().append(ele2);
+		}else{
+            $(".sp").parent().append(ele1);
+		}
         date();
     }
 	function delspecial(ts) {
@@ -506,7 +520,14 @@
     }
 </script>
 <script type="text/javascript">
-    // $('#datetimepicker3').datetimepicker({
-    //     format: 'LT'
+    // $('#starttime').datetimepicker({
+    //     datepicker:false,
+    //     format:'H:i',
+    //     step:5
+    // });
+    // $('#endtime').datetimepicker({
+    //     datepicker:false,
+    //     format:'H:i',
+    //     step:5
     // });
 </script>

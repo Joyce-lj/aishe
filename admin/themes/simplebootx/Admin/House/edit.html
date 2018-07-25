@@ -1,5 +1,6 @@
 <admintpl file="header" />
 <link rel="stylesheet" href="__ROOT__/easyupload/easy-upload.css">
+<!--<link rel="stylesheet" href="__PUBLIC__/js/datetimepicker/jquery.datetimepicker.css">-->
 <style>
 	.easy_upload_delbtn{
 		display: none;
@@ -16,6 +17,12 @@
 		width: 100px;
 		margin-left: 6px;
 		margin-right: 6px;
+	}
+	.specialrent{
+		margin-bottom: 10px;
+	}
+	.specialtime{
+		margin-bottom: 10px;
 	}
 </style>
 </head>
@@ -131,12 +138,14 @@
 							</tr>
 							<tr>
 								<td>
-									<input type="text" name="starttime" value="{$data.starttime|date='Y-m-d H:i',###}" class="js-datetime" placeholder="">
-									<!--<input type="text" name="starttime" id='starttime' class="js-datetime" value="{$formget.starttime|default=''}" style="width: 205px;" autocomplete="off">-->
+									<input type="text" name="starttime"id="starttime" value="{$data.starttime|date='H:i',###}" class="js-datetime1" placeholder="">
+									<!--<i style="width: 36px;position: absolute;cursor: pointer" class="">-->
+										<!--<img src="__TMPL__Public/assets/images/cal.png" alt="" id="starttime-img" style="margin-left:-36px;margin-top: -2px">-->
+									<!--</i>-->
 								</td>
 								<td>
-									<input type="text" name="endtime" value="{$data.endtime|date='Y-m-d H:i',###}" class="js-datetime">
-									<!--<input type="text"  name="endtime" id="endtime" class="js-datetime" value="{$formget.endtime|default=''}" style="width: 205px;" autocomplete="off">-->
+									<input type="text" name="endtime" id='endtime' value="{$data.endtime|date='H:i',###}" class="js-datetime1">
+									<!--<i style="width: 36px;position: absolute;cursor: pointer"><img onclick="cal()"id="endtime-img"  src="__TMPL__Public/assets/images/cal.png" alt=""  style="margin-left:-36px;margin-top: -2px"></i>-->
 								</td>
 								<td>
 									<input type="text" name="cash" id="cash" value="{$data.cash}" style="width: 205px;">
@@ -199,7 +208,12 @@
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<p><input type="checkbox" id="lz" >&nbsp;&nbsp;&nbsp;&nbsp;长租折扣 请输入长租折扣</p>
+						<empty name="data.discount2">
+							<p><input type="checkbox" id="lz" >&nbsp;&nbsp;&nbsp;&nbsp;长租折扣 请输入长租折扣</p>
+							<else/>
+							<p><input type="checkbox" id="lz" checked="checked">&nbsp;&nbsp;&nbsp;&nbsp;长租折扣 请输入长租折扣</p>
+						</empty>
+
 						<php>
 							$count = count($data['discount2']);
 							$diff = intval(3 - count($data['discount2']));
@@ -215,15 +229,38 @@
 
 				<div class="control-group">
 					<div class="controls">
-						<p><input type="checkbox" id="tj">&nbsp;&nbsp;&nbsp;&nbsp;特殊价格设定</p>
-						<p class="sp">
-							<foreach name="data.specialprice2" item="vo">
-								<input type="text" name="specialrent[]" id=''class='specialrent'  value="{$vo.money}" placeholder="" style="text-align: center" >(元/天)
-								<input type="text" name="specialtime[]" class='specialtime js-datetime'  value="{$vo.time|date='Y-m-d H:i',###}" style="width: 120px;" >
+						<empty name="data.specialprice2">
+							<p><input type="checkbox" id="tj">&nbsp;&nbsp;&nbsp;&nbsp;特殊价格设定</p>
+							<else/>
+							<p><input type="checkbox" id="tj" checked="checked">&nbsp;&nbsp;&nbsp;&nbsp;特殊价格设定</p>
+						</empty>
+						<if  condition="$data.specialprice2 == ''">
+							<input type="text" name="specialrent[]" class='specialrent'  value="" placeholder="" style="text-align: center;margin-bottom: 10px;" >(元/天)
+							<input type="text" name="specialtime[]" class='specialtime js-datetime'  value="" style="width: 120px;margin-bottom: 10px;"  >
+							<if condition="$online != 1">
 								<input type="button" value="添加" onclick="addspecial()">
+								<else/>
+								<input type="button" value="添加" onclick="addspecial()" disabled>
+							</if>
+
+						</if>
+
+							<foreach name="data.specialprice2" item="vo" key="k">
+								<p class="sp">
+								<input type="text" name="specialrent[]" class='specialrent'  value="{$vo.money}" placeholder="" style="text-align: center;" >(元/天)
+								<input type="text" name="specialtime[]" class='specialtime js-datetime'  value="{$vo.time|date='Y-m-d H:i',###}" style="width: 120px;" >
+								<if condition="$k eq 0">
+									<input type="button" value="添加" onclick="addspecial()">
+									<input type="button" value="删除" onclick="delspecial(this)">
+								</if>
+								<if condition="$k gt 0">
+									<input type="button" value="删除" onclick="delspecial(this)">
+								</if>
+								<!--<input type="button" value="添加" onclick="addspecial()">-->
 								<!--<input type="button" value="删除" onclick="delspecial(this)">-->
+								</p>
 							</foreach>
-						</p>
+
 					</div>
 				</div>
 
@@ -334,6 +371,7 @@
 		</form>
 	</div>
 	<script src="__PUBLIC__/js/common.js"></script>
+	<!--<script src="__PUBLIC__/js/datetimepicker/jquery.datetimepicker.full.js"></script>-->
 	<script src="__ROOT__/easyupload/vendor/jquery.cookie-1.4.1.min.js"></script>
 	<script src="__ROOT__/easyupload/easyUpload.js"></script>
 	<script>
@@ -531,7 +569,7 @@
 
         function addspecial() {
             var ele="<p class=\"sp\">" +
-                " <input type=\"text\" name=\"specialrent[]\" class='specialrent' value=\"\" placeholder=\"\" >(元/天)\n" +
+                " <input type=\"text\" name=\"specialrent[]\" class='specialrent' value=\"\" placeholder=\"\" style=\"\">(元/天)\n" +
                 "<input type=\"text\" name=\"specialtime[]\" class=\"js-datetime specialtime\" value=\"{$formget.time|default=''}\" style=\"width: 120px;\" autocomplete=\"off\" >\n" +
                 "<input onclick=\"delspecial(this)\" type='button' value='删除'/>" +
                 "</p>";
@@ -553,6 +591,18 @@
                 });
             }
         }
+	</script>
+	<script type="text/javascript">
+        // $('#starttime').datetimepicker({
+        //     datepicker:false,
+        //     format:'H:i',
+        //     step:5
+        // });
+        // $('#endtime').datetimepicker({
+        //     datepicker:false,
+        //     format:'H:i',
+        //     step:5
+        // });
 	</script>
 </body>
 </html>
