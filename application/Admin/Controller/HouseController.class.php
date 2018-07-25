@@ -13,6 +13,7 @@ class HouseController extends AdminbaseController {
     protected $housetype_model;
     protected $housedetail_model;
     protected $housephoto_model;
+    protected $houseorder_model;
     protected $city_model;
 //    protected $auth_rule_model;
 
@@ -23,6 +24,7 @@ class HouseController extends AdminbaseController {
         $this->housetype_model = D("Common/Housetype");
         $this->housedetail_model = D("Common/Housedetail");
         $this->housephoto_model = D("Common/Housephoto");
+        $this->houseorder_model = D("Common/Houseorder");
         $this->city_model = D("Common/City");
 //        $this->auth_rule_model = D("Common/AuthRule");
     }
@@ -155,11 +157,52 @@ class HouseController extends AdminbaseController {
     	}
     }
 
+    /**
+     * 当前时间之后的两个月的订单详情
+    */
     public function orderlist(){
-        $houseid = I('get.houseid');
-        $where['houseid'] = $houseid;
-        $order= $this->house_model->where($where)->select();
-        $this->assign('orderlist',$order);
+        $houseid = I('get.houseid',0,'intval');
+        $where['as_houseorder.houseid'] = intval($houseid);
+        $field = 'as_houseorder.houseid,as_houseorder.housename,as_houseorder.checkin_time,as_houseorder.checkout_time,as_houseorder.mid
+                   ,as_member.memberphone';
+        $this->houseorder_model->join("LEFT JOIN __MEMBER__ ON __HOUSEORDER__.mid = __MEMBER__.mid");
+        $this->houseorder_model->where($where);
+        $this->houseorder_model->field($field);
+        $order = $this->houseorder_model->select();
+        $zeroTimestamp = strtotime(date('Y-m-d',time()));
+        foreach ($order  as $or=>$v){
+            $order[$or]['orderdate'] = $this->dateList($order[$or]['checkin_time'],$order[$or]['checkout_time']);
+            $count = count($order[$or]['orderdate']);
+            unset($order[$or]['orderdate'][$count-1]);
+            for ($i=0;$i<$count-1;$i++){
+                //预定时间小于当天凌晨时间则不记录
+                if(strtotime($order[$or]['orderdate'][$i]) > $zeroTimestamp || strtotime($order[$or]['orderdate'][$i]) == $zeroTimestamp){
+                    $orderDate[$order[$or]['orderdate'][$i]] = $order[$or];
+                }
+            }
+        }
+
+        //重新整理$orderdate数据
+        foreach ($orderDate as $date=>$v){
+            $reorder[$date]['date'] = $date;
+            $reorder[$date]['memberphone'] = $orderDate[$date]['memberphone'] ;
+            $reorder[$date]['isorder'] = 1 ;
+        }
+
+        //2个月之后的时间戳
+        $afterTwoMonths = strtotime('+2 months');
+
+        $currentTime = time();
+        $twoMonthsDate= $this->dateList($currentTime,$afterTwoMonths);
+        for($i=0;$i<count($twoMonthsDate);$i++){
+            $res[$twoMonthsDate[$i]]['date'] = $twoMonthsDate[$i];
+            $res[$twoMonthsDate[$i]]['memberphone'] = '';
+            $res[$twoMonthsDate[$i]]['isorder'] = 0;
+        }
+        $res = array_merge($res,$reorder);
+        $housename = $this->house_model->where(array('houseid'=>$houseid))->field('housename')->find();
+        $this->assign('orderlist',array_values($res));
+        $this->assign('housename',$housename['housename']);
         $this->display();
     }
     public function delete_attach(){
@@ -492,5 +535,12 @@ class HouseController extends AdminbaseController {
         return $city;
     }
 
+    public function dateList($starttime,$endtime){
 
+        $days = (intval($endtime)- intval($starttime))/86400 + 1;
+        for($i=0; $i<$days; $i++){
+            $dates[] = date('Y-m-d', intval($starttime)+(86400*$i));
+        }
+        return $dates;
+    }
 }

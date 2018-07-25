@@ -99,9 +99,9 @@ class HousedetailController extends AppframeController{
         $data = $this->housedetail_model->where($where)->field($field)->select();
         $usingDate = $this->getOrderedHouseTime($houseid);
         foreach ($data as $k=>$v){
-            $days = (intval($data[$k]['endtime'])- intval($data[$k]['starttime']))/86400 + 1;
-            $data[$k]['starttime'] = date('Y-m-d',$data[$k]['starttime']);
-            $data[$k]['endtime'] = date('Y-m-d',$data[$k]['endtime']);
+//            $days = (intval($data[$k]['endtime'])- intval($data[$k]['starttime']))/86400 + 1;
+            $data[$k]['starttime'] = date('H:i',$data[$k]['starttime']);
+            $data[$k]['endtime'] = date('H:i',$data[$k]['endtime']);
             $data[$k]['housediscount'] = json_decode($data[$k]['discount'],true);
             //特殊价格
             $data[$k]['specialprice'] = json_decode($data[$k]['specialprice'],true);
@@ -118,25 +118,25 @@ class HousedetailController extends AppframeController{
                     'price'=> $data[$k]['specialprice'][$sp]['money'],
                 );
             }
+            $data[$k]['specialprice'] = array_values($specialprice);
+            //所有可预约时间==无限制
+//            for($i=0; $i<$days; $i++){
+//                $dates[] = date('Y-m-d', strtotime($data[$k]['starttime'])+(86400*$i));
+//            }
 
-            //所有可预约时间
-            for($i=0; $i<$days; $i++){
-                $dates[] = date('Y-m-d', strtotime($data[$k]['starttime'])+(86400*$i));
-            }
-
-            for($i=0;$i< count($dates); $i++){
-                $dsplit = explode('-',$dates[$i]);
-                $ordertime[$dates[$i]] = array(
-                    'using'=>0,
-                    'special'=> 0,
-                    'date'=> $dates[$i],
-                    'year'=> $dsplit[0],
-                    'month'=> $dsplit[1],
-                    'day'=> $dsplit[2],
-                    'price'=> $data[$k]['price'],
-                );
-            }
-            $ordertime = array_merge($ordertime,$specialprice);
+//            for($i=0;$i< count($dates); $i++){
+//                $dsplit = explode('-',$dates[$i]);
+//                $ordertime[$dates[$i]] = array(
+//                    'using'=>0,
+//                    'special'=> 0,
+//                    'date'=> $dates[$i],
+//                    'year'=> $dsplit[0],
+//                    'month'=> $dsplit[1],
+//                    'day'=> $dsplit[2],
+//                    'price'=> $data[$k]['price'],
+//                );
+//            }
+//            $ordertime = array_merge($ordertime,$specialprice);
 
             //对已预约到日期做标注
             $usingDate = $this->getOrderedHouseTime($houseid);
@@ -154,9 +154,8 @@ class HousedetailController extends AppframeController{
                     'price'=> $data[$k]['price'],
                 );
             }
-            $ordertime2 = array_merge($ordertime2,$specialprice);
-            $finalDate = array_merge($ordertime,$ordertime2);
-            //标注结束
+            $finalDate = array_merge($ordertime2,$specialprice);
+            //已约标注结束
             $data[$k]['ordertime'] = array_values($finalDate);
         }
 
