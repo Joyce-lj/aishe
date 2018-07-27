@@ -7,12 +7,18 @@
 			<!--<li><a href="{:U('housesource/add')}">新增标签</a></li>-->
 			<!--<li><a href="{:U('slideshow/lists')}">{:L('ADMIN_MENU_LISTS')}</a></li>-->
 		</ul>
-		<h3>房源名称&nbsp;:&nbsp;&nbsp;{$housename}</h3>
+		<h3>
+			房源名称&nbsp;:&nbsp;&nbsp;{$housename}
+			<empty name="orderlist">
+				<span style="color: red;margin-left: 20px">当前没有预定信息</span>
+			</empty>
+		</h3>
 		<!--<form class="well form-search" method="post" action="{:U('house/index')}">&nbsp;&nbsp;-->
 			<!--关键字：-->
 			<!--<input type="text" name="keyword" id="keyword" style="width: 200px;" value="{$keyword|default=''}" placeholder="请输入房源名称搜索">-->
 			<!--<input type="submit" class="btn btn-primary" value="搜索" />-->
 		<!--</form>-->
+
 
 		<form class="js-ajax-form" action="{:U('house/listorders')}" method="post">
 			<!--<div class="table-actions">-->

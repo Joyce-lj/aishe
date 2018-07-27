@@ -28,7 +28,20 @@
 		cursor: pointer;
 		border: 1px solid black;
 	}
+	.pic-list li {
+		margin-bottom: 5px;
+	}
 </style>
+<script type="text/html" id="photos-item-wrapper">
+	<li id="savedimage{id}">
+		<input id="photo-{id}" type="hidden" name="photos_url[]" value="{filepath}">
+		权重:&nbsp;<input type="text" name="weight[]" style="width: 50px;">
+		<input id="photo-{id}-name" type="text" name="photos_alt[]" value="{name}" style="width: 160px;" title="图片名称">
+		<img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;" onclick="parent.image_preview_dialog(this.src);">
+		<a href="javascript:upload_one_image('图片上传','#photo-{id}');">替换</a>
+		<a href="javascript:(function(){$('#savedimage{id}').remove();})();">移除</a>
+	</li>
+</script>
 </head>
 <body>
 	<div class="wrap">
@@ -50,7 +63,7 @@
 				<div class="control-group">
 					<label class="control-label">房源类型:</label>
 					<div class="controls">
-						<select name="housetag">
+						<select name="typename">
 							<foreach name="housetag" item="vo">
 								<option value="{$vo.id}">{$vo.typename}</option>
 							</foreach>
@@ -224,9 +237,12 @@
 				<div class="control-group">
 					<label class="control-label">房源照片:</label>
 					<div class="controls">
-						<input type="text" name="aids" class="aids" value="" required style="display: none">
-						<div id="easyContainer">
-						</div>
+						<!--<input type="text" name="aids" class="aids" value="" required style="display: none">-->
+						<!--<div id="easyContainer">-->
+						<!--</div>-->
+
+						<ul id="photos" class="pic-list unstyled"></ul>
+						<a href="javascript:upload_multi_image('图片上传','#photos','photos-item-wrapper');" class="btn btn-small">选择图片</a>
 					</div>
 				</div>
                 <div class="control-group">
@@ -331,7 +347,7 @@
                         $(".aids").val(undeleids);
                         console.log(data);
                     }else{
-                        console.log('文件未上传成功'+data);
+                        console.log('文件未删除成功'+data);
                     }
                 },
                 dataType: 'json',
@@ -383,10 +399,10 @@
         }
 
 
-        if(aids == '' || aids == null){
-            alert('房源照片还没有上传哦!');
-            return false;
-		}
+        // if(aids == '' || aids == null){
+         //    alert('房源照片还没有上传哦!');
+         //    return false;
+		// }
 
 	}
 
