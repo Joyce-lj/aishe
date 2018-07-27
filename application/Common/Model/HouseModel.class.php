@@ -39,4 +39,17 @@ class HouseModel extends CommonModel {
         }
         return $house;
     }
+
+    /**
+     * 根据房源标签查找房子个数
+     * @param
+     * return array
+    */
+    public function getHousenumGroupbyTagid($where=array()){
+        $this->where($where);
+        $this->field('tagid,count(*) as num');
+        $this->group('tagid');
+        $res = $this->select('tagid');
+        return $res;
+    }
 }

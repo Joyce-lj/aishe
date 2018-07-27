@@ -36,7 +36,7 @@ class HouseorderController extends AppframeController{
         $ordertime = time();
         $houseid = I('request.houseid');
         $uid = I('request.uid');
-        $cid = I('request.cid');
+        $cmid = I('request.cmid');
         $checkin_time = strtotime(I('request.checkin_time'));
         $checkout_time = strtotime(I('request.checkout_time'));
         $checkin_members = I('request.checkin_members');
@@ -53,7 +53,8 @@ class HouseorderController extends AppframeController{
         $insdata['houseid'] = $houseid;
         $housename =  $this->getHousenameById($houseid);
         //所使用的优惠券
-        $cup = $this->coupon_model->CouponList('conditions',array('cid'=>$cid));
+        $cid = $this->memberCoupon_model->where(array('cmid'=>$cmid))->field('cid')->find();
+        $cup = $this->coupon_model->CouponList('conditions',array('cid'=>$cid['cid']));
         if(!empty($cup)){
             $cond = json_decode($cup[0]['conditions'],true);
             $coupon = $cond['discount'];
@@ -128,7 +129,8 @@ class HouseorderController extends AppframeController{
             $insId = $this->houseorder_model->add($insdata);
             //修改用户优惠券状态Wie已过期
             $upstate['state'] = 2;
-            $cstate = $this->memberCoupon_model->where(array('cid'=>$cid,'mid'=>$uid))->save($upstate);
+            $cstate = $this->memberCoupon_model->where(array('cmid'=>$cmid,'mid'=>$uid))->save($upstate);
+//            echo $this->memberCoupon_model->getLastSql();die;
             //2.调用支付接口
             $paystate = 1;
             if($paystate){//成功

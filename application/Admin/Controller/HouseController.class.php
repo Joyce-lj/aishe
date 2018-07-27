@@ -88,7 +88,7 @@ class HouseController extends AdminbaseController {
             'rootPath'   =>    './uploads/license/',
             'savePath'   =>    '',
             'saveName'   =>    array('uniqid',''),
-            'exts'       =>    array('jpg', 'gif', 'png', 'jpeg','doc','docx','pdf','zip','txt','tif'),
+            'exts'       =>    array('jpg', 'gif', 'png', 'jpeg','doc','docx','pdf','zip','txt'),
             'autoSub'    =>    true,
             'subName'    =>    array('date','Ymd'),
         );
@@ -107,7 +107,7 @@ class HouseController extends AdminbaseController {
             'rootPath'   =>    './uploads/house/',
             'savePath'   =>    '',
             'saveName'   =>    array('uniqid',''),
-            'exts'       =>    array('jpg', 'gif', 'png', 'jpeg','doc','docx','pdf','zip','txt','tif'),
+            'exts'       =>    array('jpg', 'gif', 'png', 'jpeg','doc','docx','pdf','zip','txt'),
             'autoSub'    =>    true,
             'subName'    =>    array('date','Ymd'),
         );
@@ -152,6 +152,8 @@ class HouseController extends AdminbaseController {
 
     // 后台房源添加提交
     public function add_post() {
+//        print_r($_POST);
+//        print_r($_FILES);die;
     	if (IS_POST) {
     		$this->formData('add');
     	}
@@ -214,18 +216,20 @@ class HouseController extends AdminbaseController {
         $delids = array_diff($allids,$undeleids);
         //删除数据库数据1.删除附件表2,修改新闻表关联的附件id,3.删除上传目录的文件
         if(!empty($delids)){
-            $map['id']  = array('IN',$delids);
+            $map['photoid']  = array('IN',$delids);
             //1.首先查找所删id的附件名称
-            $attachInfo = $this->attachment_model->where($map)->select();
+            $attachInfo = $this->housephoto_model->where($map)->select();
 //            echo $this->attachment_model->getLastSql();
 
             //2删除数据库信息
-            $attach = $this->attachment_model->where($map)->delete();
+//            $this->housephoto_model->transStart();
+            $this->housephoto_model->startTrans();
+            $attach = $this->housephoto_model->where($map)->delete();
             if($attach){
                 //3.删除服务器存在的文件
-                $dir =$_SERVER['DOCUMENT_ROOT']. __ROOT__.'/uploads/';
+                $dir =$_SERVER['DOCUMENT_ROOT'].__ROOT__.'/uploads/house/';
                 foreach ($attachInfo as $k => $v ){
-                    $delfile = $dir.$v['file_path'].$v['save_name'];
+                    $delfile = $dir.$v['photopath'].$v['savename'];
                     if(is_file($delfile)){
                         if(!unlink($delfile)){
                             $error['msg'] = '删除文件出错!';
@@ -233,6 +237,7 @@ class HouseController extends AdminbaseController {
                         }else {
                             $error['msg'] = '文件删除成功!';
                             $error['code'] = '0';
+                            $this->housephoto_model->commit();
                         }
                     }else{
                         $error['msg'] = '文件不存在!';
@@ -242,6 +247,7 @@ class HouseController extends AdminbaseController {
             }else{
                 $error['msg'] = '删除失败!';
                 $error['code'] = '-3';
+                $this->housephoto_model->rollback();
             }
 
         }
@@ -259,8 +265,8 @@ class HouseController extends AdminbaseController {
             $this->housephoto_model->startTrans();
             $photoid = $this->housephoto_model->where($where)->delete();
             if($photoid){
-                $basedir =$_SERVER['DOCUMENT_ROOT']. __ROOT__.'/uploads/house/';
-                $fullpath = $basedir.$info['photopath'].$info['savename'];
+                $basedir =$_SERVER['DOCUMENT_ROOT']. __ROOT__.'/data/upload/';
+                $fullpath = $basedir.$info['photopath'];
                 if(is_file($fullpath)){
                     if(!unlink($fullpath)){
                         $msg['msg'] = '删除文件出错!';
@@ -368,7 +374,7 @@ class HouseController extends AdminbaseController {
         //house数据
         if ($this->house_model->create()!==false) {
             $house['housename'] = I('post.housename');
-            $house['tagid'] = I('post.housetag');
+            $house['tagid'] = I('post.typename');
             $house['houseintro'] = I('post.houseintro');
             $house['houseorder'] = I('post.houseorder');
             $house['housecity'] = I('post.housecity');
@@ -440,7 +446,6 @@ class HouseController extends AdminbaseController {
                     }else{
                         $uphousedetailid = $this->housedetail_model->where($where)->add($detail);
                     }
-
 //                    echo $this->housedetail_model->getLastSql();die;
                 }
             }
@@ -449,18 +454,23 @@ class HouseController extends AdminbaseController {
         }
 
         //上传房源图片+权重(ajax上传图片)
-        $aid = I('post.aids');
+        $photosurl = I('post.photos_url');
+        $photosalt = I('post.photos_alt');
         $weights = I('post.weight');
-        $aids = explode(',',$aid);
+
         $houseid = $action == 'add' ? $houseid : $id ;
-        if ($houseid) {
-            foreach($aids as $id => $v){
-                $updata['houseid'] = $houseid;
-                $updata['weight'] = $weights[$id];
-                $photoids[] = $this->housephoto_model->where(array('photoid'=>$v))->save($updata);
+        if($houseid){
+            foreach ($photosurl as $k=>$v){
+                $savename = explode('/',$photosurl[$k]);
+                $attachment['photoname'] = $photosalt[$k];
+                $attachment['savename'] = $savename[2];
+                $attachment['photopath'] = $photosurl[$k];
+                $attachment['weight'] = $weights[$k];
+                $attachment['houseid'] = $houseid;
+                $attachment['createtime'] = time();
+                //创建附件数据
+                $resnum = $this->housephoto_model->add($attachment);
             }
-        } else {
-            $this->error("房源图片添加失败！");
         }
 
         //上传许可证
@@ -477,15 +487,17 @@ class HouseController extends AdminbaseController {
         }else {
             $this->error("营业执照添加失败！");
         }
-//echo 3;die;
+
         $houseid = $action == 'add' ? $houseid : $id ;
         if($action == 'add'){
             if($houseid){
+                $this->houseSourceNum();
                 $this->success('添加成功',U('house/index'));
             }
         }
         if($action == 'save'){
             if($uphousedetailid && $uphouseid ){
+                $this->houseSourceNum();
                 $this->success('更新成功',U('house/index'));
             }
         }
@@ -542,5 +554,16 @@ class HouseController extends AdminbaseController {
             $dates[] = date('Y-m-d', intval($starttime)+(86400*$i));
         }
         return $dates;
+    }
+
+    public function houseSourceNum(){
+        $where['tagid'] = array('gt',0);
+        $tag = $this->house_model->where($where)->field('tagid,count(*) as num')->group('tagid')->select();
+        foreach ($tag as $k=>$v){
+            $where2['id'] = $tag[$k]['tagid'];
+            $updata['num'] =  $tag[$k]['num'];
+           $tag[] = $this->housesource_model->where($where2)->save($updata);
+        }
+//        return true;
     }
 }

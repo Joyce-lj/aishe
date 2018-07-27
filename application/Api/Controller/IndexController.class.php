@@ -41,10 +41,10 @@ class IndexController extends AppframeController{
         }
         //房源状态:上线
         $map['online'] = 1;
-        $field = 'as_house.houseid,as_house.housename,as_housedetail.price,as_house.typeid,as_house.housecity,as_housetype.housetype,as_house.houseposition';
+        $field = 'as_house.houseid,as_house.housename,as_housedetail.price,as_house.tagid,as_house.housecity,as_housesource.typename,as_house.houseposition';
         //满足条件的个数
         $this->house_model->join('LEFT JOIN __HOUSEDETAIL__ ON __HOUSE__.houseid = __HOUSEDETAIL__.houseid');
-        $this->house_model->join('LEFT JOIN __HOUSETYPE__ ON __HOUSETYPE__.id = __HOUSE__.typeid');
+        $this->house_model->join('LEFT JOIN __HOUSESOURCE__ ON __HOUSESOURCE__.id = __HOUSE__.tagid');
         $count=$this->house_model->where($map)->count();
 //        echo $this->house_model->getLastSql();die;
         $perpage = I('request.perpage') ? I('request.perpage') : 20;
@@ -53,7 +53,7 @@ class IndexController extends AppframeController{
         $limit = ($currentPage - 1)*$perpage;
         //house信息
         $this->house_model->join('LEFT JOIN __HOUSEDETAIL__ ON __HOUSE__.houseid = __HOUSEDETAIL__.houseid');
-        $this->house_model->join('LEFT JOIN __HOUSETYPE__ ON __HOUSETYPE__.id = __HOUSE__.typeid');
+        $this->house_model->join('LEFT JOIN __HOUSESOURCE__ ON __HOUSESOURCE__.id = __HOUSE__.tagid');
         $this->house_model->where($map);
         $this->house_model->limit($limit , $perpage);
         $house = $this->house_model->order('as_house.houseid desc')->field($field)->select();
@@ -63,8 +63,9 @@ class IndexController extends AppframeController{
             $photoinfo =  $this->housephoto_model->getPhotoByHouseid($house[$k]['houseid'],$field = 'savename,photopath,weight',1);
             $photoinfo =  array_values($photoinfo);
             foreach ($photoinfo as $p=>$v){
-                $uploadDir = 'http://192.168.0.105'.__ROOT__.'/uploads/house/';
-                $house[$k]['housephoto'] = $uploadDir.$photoinfo[$p]['photopath'].$photoinfo[$p]['savename'];
+                $uploadDir = 'http://192.168.0.105'.__ROOT__.'/data/upload/';
+//                $house[$k]['housephoto'] = $uploadDir.$photoinfo[$p]['photopath'].$photoinfo[$p]['savename'];
+                $house[$k]['housephoto'] = $uploadDir.$photoinfo[$p]['photopath'];
             }
         }
 

@@ -22,6 +22,8 @@ class CouponController extends AdminbaseController {
 
     // 后台优惠券列表
     public function index() {
+        //修改优惠券总数量和使用数量
+        $this->updateCouponNum();
         $keyword = I('request.keyword');
         if($keyword){
             $where['cname']  = array('like','%'.$keyword.'%');
@@ -30,7 +32,7 @@ class CouponController extends AdminbaseController {
         $page = $this->page($count, 5);
         $this->coupon_model->where($where);
         $this->coupon_model->limit($page->firstRow , $page->listRows);
-        $coupon = $this->coupon_model->order('cid')->field('*')->select();
+        $coupon = $this->coupon_model->order('cid desc')->field('*')->select();
 //        $couponCount = $this->memberCoupon_model->getCouponcountByConds('cid,count(*) as num','cid',array('state'=>2));
         $this->assign('coupon',$coupon);
         $this->assign("page", $page->show('Admin'));
@@ -148,6 +150,19 @@ class CouponController extends AdminbaseController {
     }
 
 
+    public function updateCouponNum(){
+        $where['cid'] = array('gt',0);
+        $sum  = $this->memberCoupon_model->where($where)->group('cid')->getField('cid,count(*) as sum',true);
+        foreach ($sum as $k=>$v){
+            $this->coupon_model->where(array('cid'=>$k))->save(array('sum'=>$sum[$k]));
+        }
+        $where['cid'] = array('gt',0);
+        $where['state'] = array('eq',2);
+        $use  = $this->memberCoupon_model->where($where)->group('cid')->getField('cid,count(*) as usecount',true);
+        foreach ($use as $k=>$v){
+            $this->coupon_model->where(array('cid'=>$k))->save(array('usecount'=>$use[$k]));
+        }
+    }
 
 
 

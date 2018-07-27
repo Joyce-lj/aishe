@@ -10,6 +10,7 @@ class HousedetailController extends AppframeController{
 	protected $housephoto_model;
 	protected $housedetail_model;
 	protected $houseorder_model;
+	protected $housesource_model;
     protected $city_model;
 	protected $perpage = 20;
 	
@@ -20,12 +21,13 @@ class HousedetailController extends AppframeController{
 		$this->housedetail_model=D("Common/Housedetail");
 		$this->housephoto_model=D("Common/Housephoto");
         $this->houseorder_model=D("Common/Houseorder");
+        $this->housesource_model=D("Common/Housesource");
 		$this->city_model=D("Common/City");
 	}
 
 	public function index(){
 	    //单价,名称,两室一厅,图片,入住人数,折扣,地图坐标,具体位置,优惠
-        $field = 'as_house.houseid,as_house.housename,as_housedetail.price,as_house.typeid,as_house.housecity,as_housedetail.maxmembers,
+        $field = 'as_house.houseid,as_house.tagid,as_house.housename,as_housedetail.price,as_house.typeid,as_house.housecity,as_housedetail.maxmembers,
                   as_housedetail.bedtype,as_housedetail.housearea,as_housedetail.discount,as_housedetail.bathroom,as_housedetail.mindays,as_housedetail.cash,
                   as_housedetail.starttime,as_housedetail.endtime,
                   as_housetype.housetype,as_house.houseintro,as_house.houseorder,as_house.houseaddress,as_house.house_x,as_house.house_y';
@@ -39,12 +41,19 @@ class HousedetailController extends AppframeController{
             $discount = json_decode($v['discount'],true);
             $houseDetail[$k]['starttime'] = date('H:i',$v['starttime']);
             $houseDetail[$k]['endtime'] = date('H:i',$v['endtime']);
+
+            //tagid
+            $tag = $this->housesource_model->where(array('id'=>$houseDetail[$k]['tagid']))->field('typename')->find();
+            $houseDetail[$k]['typename'] = $tag['typename'];
             $houseDetail[$k]['housediscount'] = $discount;
+            for($i=0;$i<count($discount);$i++){
+                $houseDetail[$k]['longrent_discount'][$i] =  '满'.$discount[$i]['days'].'天打'.$discount[$i]['discount'].'折';
+            }
             $photoinfo =  $this->housephoto_model->getPhotoByHouseid($houseDetail[$k]['houseid'],$field = 'savename,photopath,weight');
             $photoinfo =  array_values($photoinfo);
             foreach ($photoinfo as $p=>$v){
-                $uploadDir = 'http://192.168.0.105'.__ROOT__.'/uploads/house/';
-                $houseDetail[$k]['housephoto'][] = $uploadDir.$photoinfo[$p]['photopath'].$photoinfo[$p]['savename'];
+                $uploadDir = 'http://192.168.0.105'.__ROOT__.'/data/upload/';
+                $houseDetail[$k]['housephoto'][] = $uploadDir.$photoinfo[$p]['photopath'];
             }
         }
         $data['data']['housedetail'] = $houseDetail[0];
@@ -95,7 +104,7 @@ class HousedetailController extends AppframeController{
     public function pickOrderTime(){
         $houseid = I('request.houseid');
         $where['houseid'] = $houseid;
-        $field = 'houseid,price,isdiscount,discount,starttime,endtime,specialprice';
+        $field = 'houseid,price,isdiscount,discount,starttime,endtime,mindays,specialprice';
         $data = $this->housedetail_model->where($where)->field($field)->select();
         $usingDate = $this->getOrderedHouseTime($houseid);
         foreach ($data as $k=>$v){
@@ -154,7 +163,12 @@ class HousedetailController extends AppframeController{
                     'price'=> $data[$k]['price'],
                 );
             }
-            $finalDate = array_merge($ordertime2,$specialprice);
+            if(!empty($specialprice)){
+                $finalDate = array_merge($ordertime2,$specialprice);
+            }else{
+                $finalDate = $ordertime2;
+            }
+
             //已约标注结束
             $data[$k]['ordertime'] = array_values($finalDate);
         }
@@ -193,7 +207,8 @@ class HousedetailController extends AppframeController{
     }
 
     /**
-     * 时间都是时间戳
+     * 根据开始时间和截止时间,遍历之间的日期
+     * return array(二维)
     */
     public function dateList($starttime,$endtime){
 
