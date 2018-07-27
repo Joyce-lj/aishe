@@ -2164,9 +2164,9 @@ function sp_mobile_code_log($mobile,$code,$expire_time){
 }
 
 /**
-*$array:需要排序的数组
-*$keys:需要根据某个key排序
-*$sort:倒叙还是顺序
+ *$array:需要排序的数组
+ *$keys:需要根据某个key排序
+ *$sort:倒叙还是顺序
 */
 function arraySort($array,$keys,$sort='asc') {
     $newArr = $valArr = array();
