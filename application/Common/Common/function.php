@@ -2180,3 +2180,30 @@ function arraySort($array,$keys,$sort='asc') {
     }
     return $newArr;
 }
+
+/**
+ * 根据开始时间和截止时间,遍历之间的日期
+ * return array(二维)
+ */
+function dateList($starttime,$endtime){
+
+    $days = (intval($endtime)- intval($starttime))/86400 + 1;
+    for($i=0; $i<$days; $i++){
+        $dates[] = date('Y-m-d', intval($starttime)+(86400*$i));
+    }
+    return $dates;
+}
+
+/**
+ * 将错误信息写入日志
+ * @return TXT
+*/
+function addLog($failReason,$logfile,$filename){
+    $failinfos = date('Y-m-d H:i:s',time()).'------'.$failReason.'------'.date('Y-m-d H:i:s',time());
+    $filepath = $logfile.$filename;
+    chmod($filepath,0644);
+    file_put_contents($filepath, $failinfos.PHP_EOL, FILE_APPEND);
+}
+
+
+
