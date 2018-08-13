@@ -95,10 +95,10 @@
 							</if>
 							<if condition="$vo.online == 1">
 								<!--<a href="#" onclick="online({$vo['houseid']},0)" id="online_"{$vo.houseid}>下线</a>/-->
-								<a href="{:U('house/check_online',array('houseid'=>$vo['houseid'],'online'=>0))}" >下线</a>/
+								<a href="{:U('house/check_online',array('houseid'=>$vo['houseid'],'online'=>0,'p'=>$currentpage))}" >下线</a>/
 								<else/>
 								<!--<a href="#" onclick="online({$vo['houseid']},1)" id="online_"{$vo.houseid}>上线</a>/-->
-								<a href="{:U('house/check_online',array('houseid'=>$vo['houseid'],'online'=>1))}" >上线</a>/
+								<a href="{:U('house/check_online',array('houseid'=>$vo['houseid'],'online'=>1,'p'=>$currentpage))}" >上线</a>/
 							</if>
 							<a href="{:U('house/orderlist',array('houseid'=>$vo['houseid']))}" >预定情况</a>
 						</td>

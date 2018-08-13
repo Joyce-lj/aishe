@@ -31,6 +31,12 @@
 	.pic-list li {
 		margin-bottom: 5px;
 	}
+	.allmap {
+		width: 600px;
+		height: 200px;
+		overflow: hidden;
+		margin:0;
+	}
 </style>
 <script type="text/html" id="photos-item-wrapper">
 	<li id="savedimage{id}">
@@ -229,9 +235,15 @@
 				</div>
                 <div class="control-group">
 					<label for="" class="control-label">房源具体位置</label>
-                    <div class="controls">
-                        <p style=""><input type="text" name="houseaddress" placeholder="请输入房源具体位置"><button>生成</button></p>
-                        地图插件生成
+                    <div class="controls"  id="r-result">
+                        <p style=""><input type="text" name="houseaddress" placeholder="请输入房源具体位置" id="houseaddress">
+							<input type="button"  id="bmap" value="生成" onclick="theLocation()" />
+						</p>
+						<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=dIqMYQ4dGeAgcnAN8xcKNWOBgy7S79pp"></script>
+                        <!--地图插件生成//ak=dIqMYQ4dGeAgcnAN8xcKNWOBgy7S79pp-->
+						<div id="allmap" class="allmap"></div>
+						<input id="house_x" name="house_x" type="text" value="" style="display: none"/>
+						<input id="house_y" name="house_y" type="text" value="" style="display: none"/>
                     </div>
                 </div>
 				<div class="control-group">
@@ -535,15 +547,34 @@
 
     }
 </script>
+
 <script type="text/javascript">
-    // $('#starttime').datetimepicker({
-    //     datepicker:false,
-    //     format:'H:i',
-    //     step:5
-    // });
-    // $('#endtime').datetimepicker({
-    //     datepicker:false,
-    //     format:'H:i',
-    //     step:5
-    // });
+    // 百度地图API功能
+    var map = new BMap.Map("allmap");
+    var point = new BMap.Point(116.404, 39.915);
+	    map.centerAndZoom(point,15);
+
+    var localSearch = new BMap.LocalSearch(map, {
+        renderOptions:{map: map}
+    });
+    function theLocation() {
+        var keyword = $("#houseaddress").val();
+        map.clearOverlays();//清空原来的标注
+        localSearch.setSearchCompleteCallback(function (searchResult) {
+            if (typeof(searchResult) == "undefined" ||  searchResult == '' || searchResult == null) {
+                alert("百度API没有搜索到该地址");
+                return false;
+            }else{
+                var poi = searchResult.getPoi(0);
+                $('#house_x').val(poi.point.lng);
+                $('#house_y').val(poi.point.lat);
+                map.centerAndZoom(poi.point, 15);
+                var marker = new BMap.Marker(new BMap.Point(poi.point.lng, poi.point.lat));  // 创建标注，为要查询的地址对应的经纬度
+                map.addOverlay(marker);
+			}
+
+        });
+		localSearch.search(keyword);
+    }
+
 </script>
