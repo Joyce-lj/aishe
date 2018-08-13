@@ -108,4 +108,40 @@ class HouseorderModel extends CommonModel {
         print_r($staydate);
     }
 
+
+    /**
+     * 房源已租日期
+     * return array
+     */
+    public function getOrderedHouseTime($houseid,$lock=false){
+        $field='houseid,checkin_time,checkout_time';
+//        max(score)
+        $where['houseid'] = $houseid;
+        if($lock){
+            $this->lock(true);
+        }else{
+            $this->lock(false);
+        }
+        $orderTime = $this->where($where)->field($field)->select();
+        foreach ($orderTime as $k=>$v){
+            $a[] = dateList($orderTime[$k]['checkin_time'],$orderTime[$k]['checkout_time']);
+        }
+        $n = count($a);
+        $b = array();
+        for ($i = 0;$i<$n;$i++){
+            $num = count($a[$i]);
+            unset($a[$i][$num-1]);
+            $a[$i]['houseid'] = $houseid;
+        }
+
+        for ($i = 0;$i<1;$i++){
+            for($j=$n-1;$j>=0;$j--){
+                if($a[$j]['houseid'] == $a[$i]['houseid'] ){
+                    $b = array_merge($b,$a[$j]);
+                }
+            }
+            unset($b['houseid']);
+        }
+        return $b;
+    }
 }

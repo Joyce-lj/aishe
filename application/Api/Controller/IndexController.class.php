@@ -31,7 +31,7 @@ class IndexController extends AppframeController{
         $keyword = I('get.keyword');
         if($keyword){
             $where['housename'] = array('like','%'.$keyword.'%');
-            $where['housetype'] = array('like','%'.$keyword.'%');
+//            $where['housetype'] = array('like','%'.$keyword.'%');
             $where['price'] = array('like','%'.$keyword.'%');
             $where['_logic'] = 'OR';
             $map['_complex'] = $where;

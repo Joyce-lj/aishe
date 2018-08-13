@@ -106,7 +106,7 @@ class HousedetailController extends AppframeController{
         $where['houseid'] = $houseid;
         $field = 'houseid,price,isdiscount,discount,starttime,endtime,mindays,specialprice';
         $data = $this->housedetail_model->where($where)->field($field)->select();
-        $usingDate = $this->getOrderedHouseTime($houseid);
+        $usingDate = $this->houseorder_model->getOrderedHouseTime($houseid);
         foreach ($data as $k=>$v){
 //            $days = (intval($data[$k]['endtime'])- intval($data[$k]['starttime']))/86400 + 1;
             $data[$k]['starttime'] = date('H:i',$data[$k]['starttime']);
@@ -148,7 +148,7 @@ class HousedetailController extends AppframeController{
 //            $ordertime = array_merge($ordertime,$specialprice);
 
             //对已预约到日期做标注
-            $usingDate = $this->getOrderedHouseTime($houseid);
+            $usingDate = $this->houseorder_model->getOrderedHouseTime($houseid);
 
             $usingCount = count($usingDate);
             for($i=0; $i < $usingCount; $i++){
@@ -179,45 +179,45 @@ class HousedetailController extends AppframeController{
     }
 
 
-    public function getOrderedHouseTime($houseid){
-        $field='houseid,checkin_time,checkout_time';
-//        max(score)
-        $where['houseid'] = $houseid;
-        $orderTime = $this->houseorder_model->where($where)->field($field)->select();
-        foreach ($orderTime as $k=>$v){
-            $a[] = $this->dateList($orderTime[$k]['checkin_time'],$orderTime[$k]['checkout_time']);
-        }
-        $n = count($a);
-        $b = array();
-        for ($i = 0;$i<$n;$i++){
-            $num = count($a[$i]);
-            unset($a[$i][$num-1]);
-            $a[$i]['houseid'] = $houseid;
-        }
+//    public function getOrderedHouseTime($houseid){
+//        $field='houseid,checkin_time,checkout_time';
+////        max(score)
+//        $where['houseid'] = $houseid;
+//        $orderTime = $this->houseorder_model->where($where)->field($field)->select();
+//        foreach ($orderTime as $k=>$v){
+//            $a[] = $this->dateList($orderTime[$k]['checkin_time'],$orderTime[$k]['checkout_time']);
+//        }
+//        $n = count($a);
+//        $b = array();
+//        for ($i = 0;$i<$n;$i++){
+//            $num = count($a[$i]);
+//            unset($a[$i][$num-1]);
+//            $a[$i]['houseid'] = $houseid;
+//        }
+//
+//        for ($i = 0;$i<1;$i++){
+//            for($j=$n-1;$j>=0;$j--){
+//                if($a[$j]['houseid'] == $a[$i]['houseid'] ){
+//                    $b = array_merge($b,$a[$j]);
+//                }
+//            }
+//            unset($b['houseid']);
+//        }
+//        return $b;
+//    }
 
-        for ($i = 0;$i<1;$i++){
-            for($j=$n-1;$j>=0;$j--){
-                if($a[$j]['houseid'] == $a[$i]['houseid'] ){
-                    $b = array_merge($b,$a[$j]);
-                }
-            }
-            unset($b['houseid']);
-        }
-        return $b;
-    }
-
-    /**
-     * 根据开始时间和截止时间,遍历之间的日期
-     * return array(二维)
-    */
-    public function dateList($starttime,$endtime){
-
-        $days = (intval($endtime)- intval($starttime))/86400 + 1;
-        for($i=0; $i<$days; $i++){
-            $dates[] = date('Y-m-d', intval($starttime)+(86400*$i));
-        }
-        return $dates;
-    }
+//    /**
+//     * 根据开始时间和截止时间,遍历之间的日期
+//     * return array(二维)
+//    */
+//    public function dateList($starttime,$endtime){
+//
+//        $days = (intval($endtime)- intval($starttime))/86400 + 1;
+//        for($i=0; $i<$days; $i++){
+//            $dates[] = date('Y-m-d', intval($starttime)+(86400*$i));
+//        }
+//        return $dates;
+//    }
 
 
 }

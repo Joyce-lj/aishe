@@ -67,6 +67,7 @@ class HouseController extends AdminbaseController {
         $this->assign('isorder',$where['isorder']);
         $this->assign('online',$where['online']);
         $this->assign('keyword',$keyword);
+        $this->assign('currentpage',$page->CurrentPage());
         $this->display();
     }
 
@@ -385,6 +386,8 @@ class HouseController extends AdminbaseController {
             $house['ownerphone'] = I('post.ownerphone');
             $house['houselicense'] = I('post.houselicense');
             $house['typeid'] = I('post.housetype');
+            $house['house_x'] = I('post.house_x');
+            $house['house_y'] = I('post.house_y');
             $house['createtime'] = time();
             $house['online'] = I('post.online');
             if($action == 'add'){
@@ -505,9 +508,13 @@ class HouseController extends AdminbaseController {
     }
 
 
+    /**
+     * 修改房源上下线状态
+    */
     public function check_online(){
         $online = I('get.online');
         $houseid = I('get.houseid');
+        $page = I('get.p');
         $where['houseid'] = $houseid;
         $updata['online'] = $online;
         $onl = $this->house_model->where($where)->save($updata);

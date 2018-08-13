@@ -2,6 +2,7 @@
 namespace Api\Controller;
 
 use Common\Controller\AppframeController;
+use Couchbase\Document;
 
 class HouseorderController extends AppframeController{
 	
@@ -47,45 +48,6 @@ class HouseorderController extends AppframeController{
         $endweek = I('request.endweek');
         $discount = I('request.discount');
 
-        //房屋名称
-        $isOrder = 1;
-        $insdata['mid'] = $uid;
-        $insdata['houseid'] = $houseid;
-        $housename =  $this->getHousenameById($houseid);
-        //所使用的优惠券
-        $cid = $this->memberCoupon_model->where(array('cmid'=>$cmid))->field('cid')->find();
-        $cup = $this->coupon_model->CouponList('conditions',array('cid'=>$cid['cid']));
-        if(!empty($cup)){
-            $cond = json_decode($cup[0]['conditions'],true);
-            $coupon = $cond['discount'];
-        }else{
-            $coupon = 0;
-        }
-
-        $lastorder = $this->houseorder_model->limit(1)->order('createtime DESC')->field('orderid')->find();
-
-        $insdata['ordernum'] = $this->getOrderNum($lastorder['orderid']);//唯一标识的订单号
-        $insdata['housename'] = !empty($housename['housename']) ? $housename['housename'] : '房屋名称未知';
-        $insdata['checkin_time'] = $checkin_time;
-        $insdata['checkout_time'] = $checkout_time;
-        $insdata['checkin_members'] = $checkin_members;
-        $insdata['createtime'] = $ordertime;
-        $insdata['staydays'] = $staydays;
-        $insdata['orderstate'] = 2;   //已支付未确认
-        $insdata['sum_cost'] = $discount_cost;
-        $insdata['discount_cost'] = $discount_cost;
-        $insdata['stayinfo'] = json_encode(array(
-                'startweek'=>$startweek,
-                'endweek'=>$endweek,
-                'discount'=>$discount,
-                'coupon'=>$coupon,
-        ));
-
-        $userinfo = $this->member_model->getUserByUid('memberphone',array('mid'=>$uid));
-        $insdata['orderphone'] = $userinfo[0]['memberphone'];
-
-        $where = array('houseid'=>$houseid);
-        $updata = array('isorder'=>$isOrder);
         if(empty($uid)){
             $data['code'] = -2;
             $data['msg'] = 'uid参数有误!';
@@ -106,28 +68,78 @@ class HouseorderController extends AppframeController{
             $data['code'] = -2;
             $data['msg'] = 'houseid参数有误!';
             $this->ajaxData($data);
-        }else{
-            $state = $this->house_model->where(array('houseid'=>$houseid))->field('isorder')->find();
-            if($state['isorder'] == 1){
-                $data['code'] = -3;
-                $data['msg'] = '该房屋已被预定,请选择其他房屋!';
-//                $this->ajaxData($data);
-            }
         }
+
+        //同时下单
+        $this->houseorder_model->startTrans();
+        $alreadyDate = $this->houseorder_model->getOrderedHouseTime($houseid,$lock=true);
+        $pickDate =  dateList($checkin_time,$checkout_time);
+        $interDate = array_intersect($alreadyDate,$pickDate);
+        if($interDate){//有交集
+            $data['code'] = -1;
+            $data['msg'] = 'fail';//下单日期与已租日期有交集
+            //写入log
+            $failReason = '用户'.$uid.'房源'.$houseid.'下单日期'.$checkin_time.'至'.$checkout_time.'与已租日期有交集';
+            $logfile = dirname(dirname(dirname(__DIR__))).'\/data\/errorlog\/order\/';
+            if(!is_dir($logfile)){echo 1;
+                mkdir($logfile, 0777,true);
+            }
+            $filename = 'order.txt';
+            addLog($failReason,$logfile,$filename);
+        }else{
+            //房屋名称
+            $isOrder = 1;
+            $insdata['mid'] = $uid;
+            $insdata['houseid'] = $houseid;
+            $housename =  $this->getHousenameById($houseid);
+            //所使用的优惠券
+            $cid = $this->memberCoupon_model->where(array('cmid'=>$cmid))->field('cid')->find();
+            $cup = $this->coupon_model->CouponList('conditions',array('cid'=>$cid['cid']));
+            if(!empty($cup)){
+                $cond = json_decode($cup[0]['conditions'],true);
+                $coupon = $cond['discount'];
+            }else{
+                $coupon = 0;
+            }
+
+            $lastorder = $this->houseorder_model->limit(1)->order('createtime DESC')->field('orderid')->find();
+
+            $insdata['ordernum'] = $this->getOrderNum($lastorder['orderid']);//唯一标识的订单号
+            $insdata['housename'] = !empty($housename['housename']) ? $housename['housename'] : '房屋名称未知';
+            $insdata['checkin_time'] = $checkin_time;
+            $insdata['checkout_time'] = $checkout_time;
+            $insdata['checkin_members'] = $checkin_members;
+            $insdata['createtime'] = $ordertime;
+            $insdata['staydays'] = $staydays;
+            $insdata['orderstate'] = 2;   //已支付未确认
+            $insdata['sum_cost'] = $discount_cost;
+            $insdata['discount_cost'] = $discount_cost;
+            $insdata['stayinfo'] = json_encode(array(
+                'startweek'=>$startweek,
+                'endweek'=>$endweek,
+                'discount'=>$discount,
+                'coupon'=>$coupon,
+            ));
+
+            $userinfo = $this->member_model->getUserByUid('memberphone',array('mid'=>$uid));
+            $insdata['orderphone'] = $userinfo[0]['memberphone'];
+
+            $where = array('houseid'=>$houseid);
+            $updata = array('isorder'=>$isOrder);
+
+        }
+
+
         if(!empty($where)){
             $paystate = 0;//1支付成功,0支付失败
             //事务处理
-            //如果未支付成功,则回滚插入的数据(即订单未入库=未生成)
-            //如果支付成功则,生成一条订单数据,并且房源被标记已预订
+                //如果未支付成功,则回滚插入的数据(即订单未入库=未生成)
+                //如果支付成功则,生成一条订单数据,并且房源被标记已预订
             //开启事务
-//            $this->housephoto_model->startTrans();
-//            $this->housephoto_model->commit();
-//            $this->housephoto_model->rollback();
-
-            $this->housephoto_model->startTrans();
+//            $this->houseorder_model->startTrans();
             //1.入订单库
             $insId = $this->houseorder_model->add($insdata);
-            //修改用户优惠券状态Wie已过期
+            //修改用户优惠券状态=已过期
             $upstate['state'] = 2;
             $cstate = $this->memberCoupon_model->where(array('cmid'=>$cmid,'mid'=>$uid))->save($upstate);
 //            echo $this->memberCoupon_model->getLastSql();die;

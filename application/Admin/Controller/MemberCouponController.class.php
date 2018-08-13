@@ -37,7 +37,6 @@ class MemberCouponController extends AdminbaseController {
         $this->member_model->where($where);
         $this->member_model->limit($page->firstRow , $page->listRows);
         $member = $this->member_model->order('mid')->field('*')->select();
-
         $this->assign('member',$member);
         $this->assign("page", $page->show('Admin'));
         $this->assign('keyword',$keyword);
@@ -101,7 +100,7 @@ class MemberCouponController extends AdminbaseController {
         $this->memberCoupon_model->where($where);
         $this->memberCoupon_model->limit($page->firstRow , $page->listRows);
         $mclist = $this->memberCoupon_model->select();
-//        echo $this->memberCoupon_model->getLastSql();
+//        echo $this->memberCoupon_model->getLastSql();die;
         $this->assign('mclist',$mclist);
         $this->assign("page", $page->show('Admin'));
         $this->assign('keyword',$keyword);
