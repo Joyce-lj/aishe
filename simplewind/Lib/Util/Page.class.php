@@ -202,6 +202,17 @@ class Page {
         $this->Current_page = ($p <=$total_pages? $p : $total_pages);
     }
 
+
+    /**
+     * 给GetCurrentPage添加返回值
+    */
+    public function CurrentPage() {
+        $p=isset($_GET [$this->PageParam])?intval($_GET [$this->PageParam]):1;
+        $p=$p < 1 ? 1 : $p;
+        $total_pages=intval($this->Total_Pages);
+        return $this->Current_page = ($p <=$total_pages? $p : $total_pages);
+    }
+
     public function Pager($Page_tpl = '') {
         if (empty($Page_tpl))
             $Page_tpl = $this->Page_tpl ['default'];
